@@ -1,2 +1,46 @@
-everything
-hello worldfffffff
+<html>
+
+<head>
+    <title>raytrace</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_1440747_0o0fowb0j33p.css">
+    <link href="css/main.css" rel="stylesheet" type="text/css">
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=0.0">    
+</head>
+
+<body style="margin: 0px;">
+    <div>
+        <canvas id= 'canvas' style="width: 600px; height: 400px;
+         padding-left: 0;
+        padding-right: 0;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+        "></canvas>    
+        <div id="gui"> 
+            <div id="count-wrapper"> 
+                <span class="label">MATERIAL</span>
+                <div id="LAMBERT">LAMBERT</div><div id="METAL">METAL</div><div id="GLASS">GLASS</div><div id="WOOD">WOOD</div>
+            </div>
+                        
+            <div id="speed-wrapper">
+                <span class="label">TRACE DEPTH (1-8)</span><div id="speed-slider" class="slider"></div>
+            </div>
+            
+            <div id="color-wrapper">                
+                <div id="color-label">COLOR</div>
+                <canvas id="picker" width="170" height="170"></canvas>
+            </div>
+
+    </div>
+
+    <script src="share.js"></script>    
+    <script src="ui.js"></script>    
+    <script src="bundle.js"></script>
+       
+</body>
+   
+
+</html>
