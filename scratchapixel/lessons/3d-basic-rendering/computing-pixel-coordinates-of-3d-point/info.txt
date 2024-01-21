@@ -1,3 +1,0 @@
-@Computing the Pixel Coordinates of a 3D Point
-perspective-projection.md:Perspective Projection
-mathematics-computing-2d-coordinates-of-3d-points.md:Mathematics of Computing the 2D Coordinates of a 3D Point

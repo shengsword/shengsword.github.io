@@ -1,3 +1,0 @@
-@Digital Images: from File to Screen
-display-image-to-screen.md:Displaying Images to the Screen
-image-file.md:Creating, Saving and Reading Digital Images

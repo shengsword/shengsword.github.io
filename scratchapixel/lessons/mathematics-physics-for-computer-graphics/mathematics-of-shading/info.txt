@@ -1,2 +1,0 @@
-@The Mathematics of Shading
-mathematics-of-shading.md:Mathematics of Shading

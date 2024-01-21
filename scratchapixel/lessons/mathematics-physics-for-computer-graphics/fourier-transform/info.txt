@@ -1,2 +1,0 @@
-@An Introduction to Fourier Transform
-fourier-transform-intro.md:Introduction to Fourier Transform
