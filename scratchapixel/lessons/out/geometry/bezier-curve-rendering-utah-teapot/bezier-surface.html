@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>B&eacute;zier Surfaces</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h2 id="bézier-surfaces">Bézier Surfaces</h2>
+<p><img src="file:////images/bezier/beziersurface.png?" alt="Figure 1: a Bézier patch and its 16 control points (here we have a just numbered the points on the left and on the right of the patch)."></p>
+<p>Once we understand the principle of the Bézier curve extending the same technique to the Bézier surface is straightforward. Rather than having 4 points, we will define the surface with 16 points which you can see as a grid of 4x4 control points. We had one parameter to move along the curve (t) for curves. For surfaces, we will need two: one to move in the u direction and one to move in the v direction (see figure 1). Both u and v are contained within the range [0,1]. You can see the process of going from (u, v) to 3D space as a remapping of the unit square (defined by u, v) into a smooth continuous surface within the three-dimensional space. Intuitively, you can see that a Bézier surface is made of many curves going along either the u or v direction. For instance, if we move in the v direction, we need to interpolate the curves defined by points 1, 2, 3, 4 and 5, 6, 7, 8 (and so on for the rest of the surface). If we move along the u direction, the curves defined by points 1, 5, 9, 13, and 2, 6, 10, and 14 need to be interpolated instead. More formally, a point on the Bézier surface depends on the parametric values u and v, and can be defined (equation 1) as a double sum of control points and coefficients (&quot;a sum of Bézier curves&quot;):</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>u</mi><mo separator="true">,</mo><mi>v</mi><mo stretchy="false">)</mo><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>0</mn></mrow><mi>n</mi></munderover><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>0</mn></mrow><mi>m</mi></munderover><msubsup><mi>B</mi><mi>i</mi><mi>n</mi></msubsup><mo stretchy="false">(</mo><mi>u</mi><mo stretchy="false">)</mo><msubsup><mi>B</mi><mi>j</mi><mi>m</mi></msubsup><mo stretchy="false">(</mo><mi>v</mi><mo stretchy="false">)</mo><msub><mi>P</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">P(u, v) = \sum_{i=0}^n \sum_{j=0}^m B_i^n(u) B_j^m(v)P_{ij}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.0652em;vertical-align:-1.4138em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.6514em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mrel mtight">=</span><span class="mord mtight">0</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span><span style="top:-4.3em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.2777em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.6514em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span><span class="mrel mtight">=</span><span class="mord mtight">0</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span><span style="top:-4.3em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">m</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.4138em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7144em;"><span style="top:-2.453em;margin-left:-0.0502em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7144em;"><span style="top:-2.453em;margin-left:-0.0502em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">m</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3831em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mclose">)</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p>whereas for curves,</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msubsup><mi>B</mi><mi>i</mi><mi>n</mi></msubsup><mo stretchy="false">(</mo><mi>u</mi><mo stretchy="false">)</mo><mo>=</mo><mrow><mo fence="true">(</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>n</mi></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>i</mi></mstyle></mtd></mtr></mtable><mo fence="true">)</mo></mrow><msup><mi>u</mi><mi>i</mi></msup><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>u</mi><msup><mo stretchy="false">)</mo><mrow><mi>n</mi><mo>−</mo><mi>i</mi></mrow></msup></mrow><annotation encoding="application/x-tex">B_i^n(u)=\left(\begin{array}{c}n\\i\end{array}\right) u^i(1-u)^{n-i}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7144em;"><span style="top:-2.453em;margin-left:-0.0502em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.4em;vertical-align:-0.95em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">n</span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.95em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8747em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.1247em;vertical-align:-0.25em;"></span><span class="mord mathnormal">u</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8747em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="mbin mtight">−</span><span class="mord mathnormal mtight">i</span></span></span></span></span></span></span></span></span></span></span></span></span></p>
+<p>Is a <strong>Bernstein polynomial (equation 2)</strong>, and</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mrow><mo fence="true">(</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>n</mi></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>i</mi></mstyle></mtd></mtr></mtable><mo fence="true">)</mo></mrow><mo>=</mo><mfrac><mrow><mi>n</mi><mo stretchy="false">!</mo></mrow><mrow><mi>i</mi><mo stretchy="false">!</mo><mo stretchy="false">(</mo><mi>n</mi><mo>−</mo><mi>i</mi><mo stretchy="false">)</mo><mo stretchy="false">!</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\left(\begin{array}{c}n\\i\end{array}\right) = {n! \over {i!(n-i)!}}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:2.4em;vertical-align:-0.95em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">n</span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.95em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.3074em;vertical-align:-0.936em;"></span><span class="mord"><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">i</span><span class="mclose">!</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal">i</span><span class="mclose">)!</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="mclose">!</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></span></p>
+<p>is a <strong>binomial coefficient</strong> (equation 3). We can see easily see the similarities with curves. If you are interested in the terminology, we say that a Bézier surface (or patch) is constructed as the <strong>tensor product</strong> of two Bézier curves. Note that we will only consider bicubic Bézier surfaces in this lesson, that is, surfaces for which n = 3 and m = 3. Therefore, the Bernstein polynomials (equation 4) are the same as with bicubic curves (we have four of them, and they are the same for n and m. We show the coefficients for u, but the same equation is used for v):</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.16em" columnalign="left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msub><mi>K</mi><mn>1</mn></msub><mo stretchy="false">(</mo><mi>u</mi><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>t</mi><msup><mo stretchy="false">)</mo><mn>3</mn></msup></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msub><mi>K</mi><mn>2</mn></msub><mo stretchy="false">(</mo><mi>u</mi><mo stretchy="false">)</mo><mo>=</mo><mn>3</mn><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>t</mi><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>∗</mo><mi>t</mi></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msub><mi>K</mi><mn>3</mn></msub><mo stretchy="false">(</mo><mi>u</mi><mo stretchy="false">)</mo><mo>=</mo><mn>3</mn><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>t</mi><mo stretchy="false">)</mo><mo>∗</mo><msup><mi>t</mi><mn>2</mn></msup></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msub><mi>K</mi><mn>4</mn></msub><mo stretchy="false">(</mo><mi>u</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>t</mi><mn>3</mn></msup></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{array}{l} K_1(u) = (1 - t)^3\\ K_2(u) = 3(1 - t)^2 * t\\ K_3(u) = 3(1 - t) * t^2\\ K_4(u) = t^3 \end{array} 
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:4.8em;vertical-align:-2.15em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.65em;"><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal">t</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord">3</span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal">t</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal">t</span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord">3</span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal">t</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">4</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.15em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></p>
+<details>
+If you try to develop equation 2 yourself to get to equation 4, remember that \(u^0=1\) and \((1-u)^0=1\). So, for instance, when i=0, and n=3, we can rewrite equation 2 as \(u^{i=0}(1-u)^{(n=3 - i = 0)}\) which is indeed the first line in equation 4: \(K_1(u)=(1-u)^3\).
+</details>
+<h2 id="tesselating-a-bézier-patch">Tesselating a Bézier Patch</h2>
+<p><img src="file:////images/bezier/beziersurface1.gif?" alt="Figure 2: computing the position on the surface of Bézier surface for a pair of (u, v) values. First, we calculate the four control points of an auxiliary curve along the v direction using the u parameters. We then find P along this curve using the v parameter."></p>
+<p>Bézier surface can be ray traced directly, but the methods known haven't always been robust and can be slow. A more straightforward solution (often the choice of many renderers) is converting Bézier patches to polygon grids. Evaluating the position of a point on the surface for a pair of values (u, v) is easy. We need to treat each row of the 4x4 control point grid as individual bezier curves. We will use one of the parameters (u) to evaluate a position in 3D space along each of these curves. From this process, we obtain four points which we can look at as the four control points of another Bézier curve oriented along the other direction (v). Using the second parameter, v, we can evaluate the final position along this curve. This corresponds to a point on the surface for a given pair of values (u, v). Similarly to the curve, we will compute position at regular intervals of u and b, which we can use at the vertices of the polygon grid. The pseudocode looks like this:</p>
+<pre><code>point evaluateBezierSurface(point P[16], float u, float v) 
+{ 
+    point Pu[4]; 
+    // compute 4 control points along u direction
+    for (int i = 0; i &lt; 4; ++i) { 
+       point curveP[4]; 
+       curveP[0] = P[i * 4]; 
+       curveP[1] = P[i * 4 + 1]; 
+       curveP[2] = P[i * 4 + 2]; 
+       curveP[2] = P[i * 4 + 3]; 
+       Pu[i] = evalBezierCurve(curveP, u); 
+    } 
+    // compute final position on the surface using v
+    return evalBezierCurve(Pu, v); 
+}
+</code></pre>
+<p>Creating the grid once we have this function is straightforward. We need to decide how many rows and vertices of quads we want, which defines the number of steps we take in u and v, compute the vertices' positions on the surface for these pairs of (u, v) values and connect these vertices to form the mesh (check the source code further down). The advantage of converting a Bézier surface into a polygon grid is that we can adapt the number of polygons (the resolution of the grid) based on some criteria, such as the curvature of the surface or its distance to the camera (a surface closer to the camera requires a higher definition. This is the principle of the REYES algorithm used by Pixar's renderer). What we render at the end is not the Bézier surface. Instead, we evaluate the Bézier surface as a polygon mesh which we can ray trace as a mesh (as we did with the polygon sphere in lesson 10).</p>
+<h2 id="source-code">Source Code</h2>
+<p>The renderer needs to access the teapot data, which we have saved in a separate file. The format is very similar to that of polygonal objects. We first have a series of vertices and 32 arrays of 16 integers, defining the position of the patches' control points in this array.</p>
+<pre><code>// Teapot data
+const static uint16_t kTeapotNumPatches = 32; 
+const static uint16_t kTeapotNumVertices = 306; 
+uint32_t teapotPatches[kTeapotNumPatches][16] = { 
+    {  1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16}, 
+    ... 
+    {270, 270, 270, 270, 300, 305, 306, 279, 297, 303, 304, 275, 294, 301, 302, 271} 
+}; 
+ 
+float teapotVertices[kTeapotNumVertices][3] = { 
+    { 1.4000,  0.0000,  2.4000}, 
+    ... 
+    { 1.4250, -0.7980,  0.0000} 
+}; 
+</code></pre>
+<p>Finally, before the render starts, we need to convert each of these Bézier patches into a polygon grid. For each converted patch, we set the sixteen control points (lines 26-29), then construct a pair of (u, v) values for each vertex of the grid (we can control the resolution of the grid line 19), which is used to compute a position on the surface (line 33). The function returning this position computes the four auxiliary control points necessary to create a curve along the v direction using the u parameter. We can then use the v parameter to calculate the position on the surface along this curve. The rest of the code sets an array to connect the vertices (lines 36-45) and pushes the resulting polygon mesh to the list of objects (line 47).</p>
+<pre><code>Vec3f evalBezierCurve(const Vec3f *P, const float &amp;t) 
+{ 
+    float b0 = (1 - t) * (1 - t) * (1 - t); 
+    float b1 = 3 * t * (1 - t) * (1 - t); 
+    float b2 = 3 * t * t * (1 - t); 
+    float b3 = t * t * t; 
+    return P[0] * b0 + P[1] * b1 + P[2] * b2 + P[3] * b3; 
+} 
+ 
+Vec3f evalBezierPatch(const Vec3f *controlPoints, const float &amp;u, const float &amp;v) 
+{ 
+    Vec3f uCurve[4]; 
+    for (int i = 0; i &lt; 4; ++i) uCurve[i] = evalBezierCurve(controlPoints + 4 * i, u); 
+    return evalBezierCurve(uCurve, v); 
+} 
+ 
+void generatePolyTeapot(const Matrix44f &amp;o2w, std::vector&lt;Object *&gt; &amp;objects) 
+{ 
+    uint32_t divs = 16; 
+    Vec3f *P = new Vec3f[(divs + 1) * (divs + 1)]; 
+    uint32_t *nvertices = new uint32_t[divs * divs]; 
+    uint32_t *vertices = new uint32_t[divs * divs * 4]; 
+    Vec3f controlPoints[16]; 
+    for (int np = 0; np &lt; kTeapotNumPatches; ++np) { 
+        // set the control points for the current patch                                                                                                                                                    
+        for (uint32_t i = 0; i &lt; 16; ++i) 
+            controlPoints[i][0] = teapotVertices[teapotPatches[np][i] - 1][0], 
+            controlPoints[i][1] = teapotVertices[teapotPatches[np][i] - 1][1], 
+            controlPoints[i][2] = teapotVertices[teapotPatches[np][i] - 1][2]; 
+        // generate grid                                                                                                                                                                                   
+        for (uint16_t j = 0, k = 0; j &lt;= divs; ++j) { 
+            for (uint16_t i = 0; i &lt;= divs; ++i, ++k) { 
+                P[k] = evalBezierPatch(controlPoints, i / (float)divs, j / (float)divs); 
+            } 
+        } 
+        // face connectivity
+        for (uint16_t j = 0, k = 0; j &lt; divs; ++j) { 
+            for (uint16_t i = 0; i &lt; divs; ++i, ++k) { 
+                nvertices[k] = 4; 
+                vertices[k * 4] = (divs + 1) * j + i; 
+                vertices[k * 4 + 1] = (divs + 1) * (j + 1) + i; 
+                vertices[k * 4 + 2] = (divs + 1) * (j + 1) + i + 1; 
+                vertices[k * 4 + 3] = (divs + 1) * j + i + 1; 
+            } 
+        } 
+ 
+        objects.push_back(new PolygonMesh(o2w, divs * divs, nvertices, vertices, P)); 
+    } 
+ 
+    delete [] P; 
+    delete [] nvertices; 
+    delete [] vertices; 
+} 
+</code></pre>
+<details>
+![](/images/bezier/newellteapot_small.png?) The original teapot was much taller than the actual model. To get a render of the original teapot as designed by Newell, you need to scale it up by a factor of 4:3 along the y-axis. You also need to rotate the teapot along the z-axis by 90 degrees. In Newell's times, the z-axis and y-axis were swapped.
+</details>
+<p><img src="file:////images/bezier/teapotrender.png?" alt=""></p>
+<h2 id="whats-next">What's Next?</h2>
+<p>In the next chapter, we will learn about another technique called fast-forward differential to convert a Bézier patch into a grid. Nowadays, this technique is unnecessary: the conversion steps take a fraction of the overall time it takes to render the frame. However, it was valuable to speed up this pre-processing step when computers were slower.</p>
+<details>
+Exercise: try to do a wireframe render of the teapot. Rather than rendering the surface of the patches, convert a series of lines in u and v along the surface of the patches into curves. Curves can be generated as polymesh. To do so, create a series of points along the lines and use these positions to create a polymesh in the shape of a tube (or, more simply, a stripe of quads following the curve's profile).
+</details>
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>

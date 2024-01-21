@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>The Probability Distribution Function or PDF</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <p>The concepts of <strong>PDF</strong> (<strong>probability density function</strong>) and <strong>CDF</strong> (<strong>cumulative distribution function</strong>) are very important in computer graphics. Because they are so important, they shouldn't be buried into a very long lesson on Monte Carlo methods, but we will use them in the next coming chapters, and thus, they need to be introduced at this point in the lesson. If you are serious about rendering and shading (from a programming point of view), this is a chapter we recommend you read carefully. We are likely to refer to this page quite often and even re-introduce those concepts in other lessons, to give them more visibility.</p>
+<h2 id="the-probability-distribution-function-or-pdf">The Probability Distribution Function or PDF</h2>
+<p>In the previous chapters, we already introduced the concept of <strong>probability distribution</strong>. In short, a probability distribution assigns a probability to each possible outcome of a random experiment. We also suggested that a random variable could either be <strong>discrete</strong> or <strong>continuous</strong>. The number you get from throwing a die is an example of a discrete random variable and the amount of rain falling in London is an example of a continuous random variable (the amount of water falling at any given time can be measured of course, but this number can be anywhere within a given range while in the case of a dice, it can only take on a fixed value, either 1, 2, 3, 4, 5 or 6).</p>
+<p><img src="file:////images/monte-carlo-methods/pmfandpdf.png?" alt="Figure 1: example of a probability mass function (top) and a probability density function (bottom). One can be used to define a discrete probability distribution while the latter is used to define a continuous probability distribution."></p>
+<p>In <a href="/lessons/mathematics-physics-for-computer-graphics/monte-carlo-methods-mathematical-foundations/probability-distribution-part1">chapter 3</a> (in which we introduced the concept of the probability distribution), we mentioned that the function known as the <strong>binomial distribution</strong>, could be used to compute the probability of the number of successes in a sequence of n independent yes/no experiments (for example &quot;the probability of getting 3 heads, when a coin is tossed 6 times&quot;). When a function defines a <strong>discrete probability distribution</strong> (such as in the example we just provided), we call this function a <strong>probability mass function</strong> (or <strong>pmf</strong>). Let's now look at the continuous case. The height of adults in a particular ethnic group is a continuous random variable which in general, follows more or less, a normal distribution. It is a continuous variable because height is not something that is discretized as in the case of the numbers of a dice. The concept of normal or gaussian distribution was introduced in <a href="/lessons/mathematics-physics-for-computer-graphics/monte-carlo-methods-mathematical-foundations/probability-distribution-part2">chapter 8</a>. It is a function defined by two parameters, a mean and a standard deviation. When a function such as the normal distribution defines a continuous probability distribution (such as the way height is distributed among an adult population), this function is called a <strong>probability density function</strong> (or <strong>pdf</strong>). In other words, pdfs are used for continuous random variables and pmfs are used for discrete random variables. In computer graphics, we almost always deal with pdfs. In short:</p>
+<ul>
+<li>The <strong>probability mass function</strong> (<strong>pmf</strong>) is the probability distribution of discrete random variable.</li>
+<li>The <strong>probability distribution function</strong> (<strong>pdf</strong>) is the probability distribution of a continuous random variable.</li>
+</ul>
+<p>!!!
+The PDF can be used to calculate the probability that a random variable lies within an interval:</p>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mi>r</mi><mo stretchy="false">(</mo><mi>a</mi><mo>≤</mo><mi>X</mi><mo>≤</mo><mi>b</mi><mo stretchy="false">)</mo><mo>=</mo><msubsup><mo>∫</mo><mi>a</mi><mi>b</mi></msubsup><mi>p</mi><mi>d</mi><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mtext> </mtext><mi>d</mi><mi>x</mi><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">Pr( a \le X \le b) = \int_a^b pdf(x)\:dx.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8193em;vertical-align:-0.136em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">b</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.3998em;vertical-align:-0.3558em;"></span><span class="mop"><span class="mop op-symbol small-op" style="margin-right:0.19445em;position:relative;top:-0.0006em;">∫</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.044em;"><span style="top:-2.3442em;margin-left:-0.1945em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">a</span></span></span><span style="top:-3.2579em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">b</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3558em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mord mathnormal" style="margin-right:0.10764em;">df</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">x</span><span class="mord">.</span></span></span></span></p>
+<p>From this expression, it is clear that a PDF must always integrate into one over the full extent of its domain.
+!!!</p>
+<p>In mathematical notation, X ~ D means the random variable X has the probability distribution D.</p>
+<h2 id="the-cumulative-distribution-function-or-cdf">The Cumulative Distribution Function or CDF</h2>
+<p>The notion of <strong>Cumulative Distribution Function</strong> or <strong>CDF</strong> is probably one of the most important and useful concepts from the entire field of probability theory when it comes to Monte Carlo methods applied to computer graphics. Why? The rendering of CG images involves many integrals which are very hard to efficiently evaluate by any other means than a method called the Inverse Sampling Method and this method is based on CDF (we will study the Inverse Sampling Method later in this chapter). Both the concept of PDF and CDF are central to the field of rendering in computer graphics. We recommend you study them well, which shouldn't be hard, because they are pretty simple (and yet powerful) tools.</p>
+<p>In the example below (Figure 2), we have drawn the curve of the standard normal distribution function. The function is just a particular case of the normal (or gaussian) distribution function for which the parameters (\mu) and (\theta) (its mean and standard deviation) are respectively equal to 0 and 1. We introduced this function in a previous chapter of this lesson). The choice of a function here is not important. Any other probability density function could be used. Remember though that one of the main and most important properties of PDFs (as well as PMFs) is that <strong>the sum of probabilities must equal 1</strong>. If g(x) is such a function (in other words a PDF), then:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msubsup><mo>∫</mo><mrow><mo>−</mo><mi mathvariant="normal">∞</mi></mrow><mi mathvariant="normal">∞</mi></msubsup><mi>g</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mi>d</mi><mi>x</mi><mo>=</mo><mn>1.</mn></mrow><annotation encoding="application/x-tex">\int_{-\infty}^{\infty} g(x) dx = 1.
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:2.3846em;vertical-align:-0.9703em;"></span><span class="mop"><span class="mop op-symbol large-op" style="margin-right:0.44445em;position:relative;top:-0.0011em;">∫</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.4143em;"><span style="top:-1.7881em;margin-left:-0.4445em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">∞</span></span></span></span><span style="top:-3.8129em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">∞</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9703em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span><span class="mord mathnormal">d</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1.</span></span></span></span></span></p>
+<p>In this case, g(x) represents the PDF of a continuous random variable as explained at the beginning of this chapter, however, keep in mind that this is also true when the random variable is discrete (if you sum up the probability of each possible outcome, you get 1). Incidentally, one of the properties of the normal distribution, is that its integral is 1 (which is good since we need this to use this function as a PDF).</p>
+<p><img src="file:////images/monte-carlo-methods/CDF02.png?" alt="Figure 2: the CDF (bottom) of a PDF. In this example, the PDF is the standard normal distribution function (top)."></p>
+<p>In the lesson on Shading [link], we learned about integrals and we also learned how to numerically evaluate integrals using the Riemann sum technique. The idea consists of evaluating the function at regular intervals within the boundaries of the integral's domain of integration, multiplying each one of these numbers by the distance between two intervals, and summing them up. The smaller the distance between two consecutive intervals, the more accurate the approximation. We also illustrated this idea in Figure 2 (where dx=1in this example)</p>
+<p>Even though the domain of integration goes from minus to plus infinity, because the function is very close to zero outside the range [-5,5], it is acceptable to just consider values within that range. To keep the demonstration simple, we will also just evaluate the normal distribution function at 10 regular intervals within that range. In practice, you would probably want more samples to get a more accurate approximation. Here is a result of our PDF for these 10 samples (first row: sample index, second row: x values, third row: the result of the standard normal distribution function g(x)):</p>
+<p>|-table{1,2,3,4,5,6,7,8,9,10}
+|-row
+|-cell
+-4.5
+|-cell
+-3.5
+|-cell
+-2.5
+|-cell
+-1.5
+|-cell
+-0.5
+|-cell
+0.5
+|-cell
+1.5
+|-cell
+2.5
+|-cell
+3.5
+|-cell
+4.5
+|-row
+|-cell
+0.000
+|-cell
+0.000
+|-cell
+0.017
+|-cell
+0.129
+|-cell
+0.352
+|-cell
+0.352
+|-cell
+0.129
+|-cell
+0.017
+|-cell
+0.000
+|-cell
+0.000
+|-</p>
+<p>Now in this table, we rounded the numbers of the third row to the third decimal place, but if you run the program below, you can get the exact values. If you multiply each one of these numbers by the distance between each sample (dx=1 in this case) and sum them up, you get 1, as expected (not all PDFs might give you exactly 1. The standard normal distribution function has the particularity to always sum up to 1 regardless of the number of samples taken. When only a few samples are taken, integrating PDFs using the Riemann sum method only gives values close to 1 but as mentioned before, as you increase that number of samples, the sum should keep getting closer to 1. In other words, the sum of the samples will converge to 1 for all PDFs as the number of samples gets to infinity). You can check this result by compiling and executing the following program:</p>
+<pre><code>#include &lt;cstdio&gt; 
+#include &lt;cstdlib&gt; 
+#include &lt;cmath&gt; 
+int main(int argc, char **argv) 
+{ 
+    int numIter = 10; 
+    float minBound = -5, maxBound = 5; 
+    float cdf = 0, dx = (maxBound - minBound) / (float) numIter; 
+    for (int i = 0; i &lt; numIter; ++i) { 
+        float x = minBound + (maxBound - minBound) * (i + 0.5) / (float)numIter; 
+        float g_x = 1 / sqrtf(2 * M_PI) * exp(-(x * x) / 2); 
+        printf(&quot;%f %f\n&quot;, x, g_x); 
+        cdf += g_x * dx;  //add current sample to all previous samples 
+        printf(&quot;CDF at %f: %f\n&quot;, x, cdf); 
+    } 
+    printf(&quot;Sum: %f\n&quot;, cdf);  //the final sum should be 1 
+    return 0; 
+} 
+</code></pre>
+<p>Computing the CDF itself is as simple as adding the contribution of the current sample to the sum of all previous samples that were already computed (line 13 of our program). Keep in mind that we use this technique to compute the CDF of a PDF which is by definition a continuous function. Thus even though our method results in a series of discrete samples, the CDF is itself a continuous function. With only a few samples, we get a pretty crude representation of what that CDF should be (as in Figure 2 where you can see how the rectangles give a very approximate shape of the CDF for the standard normal distribution function), however, of course, the more samples you use, the closer you get to its actual &quot;true&quot; shape. This is illustrated in the following figure in which you can see the CDF of the function approximated with 10 samples (red) and 30 samples (green) compared to the actual CDF (in blue). As you can see the more samples, the closer we get to the actual CDF.</p>
+<p><img src="file:////images/monte-carlo-methods/CDF03.png?" alt="Figure 3: approximating the CDF of the standard normal distribution function with 10 samples (in red) and 30 samples (in green). The CDF is drawn in blue. In black, is a plot of the PDF. The more samples, the closer we get to the actual CDF."></p>
+<p>So the real question now. What are CDFs useful for? In probability theory they are useful for computing things such as &quot;what is the probability of getting any of the first N possible outcomes of a random variable X&quot;. Let's take an example. We know that a dice has 6 possible outcomes, it could either be 1, 2, 3, 4, 5, or 6. And we also know that each of these outcomes has a probability 1/6. Now, if we want to know the probability of getting any number lower or equal to 4 when we throw these dice, what we need to do, is sum up the probability of having a 1, a 2, a 3, and a 4. We can write this mathematically as:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>Pr</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>X</mi><mo>&lt;</mo><mo>=</mo><mn>4</mn><mo stretchy="false">)</mo><mo>=</mo><mi>Pr</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo><mo>+</mo><mi>Pr</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo><mo>+</mo><mi>Pr</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo><mo>+</mo><mi>Pr</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo><mo>=</mo><mfrac><mn>1</mn><mn>6</mn></mfrac><mo>+</mo><mfrac><mn>1</mn><mn>6</mn></mfrac><mo>+</mo><mfrac><mn>1</mn><mn>6</mn></mfrac><mo>+</mo><mfrac><mn>1</mn><mn>6</mn></mfrac><mo>=</mo><mfrac><mn>4</mn><mn>6</mn></mfrac><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">\Pr(X &lt;= 4) = \Pr(1) + \Pr(2) + \Pr(3) + \Pr(4) = \dfrac{1}{6} + \dfrac{1}{6} + \dfrac{1}{6} + \dfrac{1}{6} = \dfrac{4}{6}.
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">Pr</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">4</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">Pr</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">Pr</span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">Pr</span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">Pr</span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">6</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">6</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">6</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">6</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">6</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">4</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mord">.</span></span></span></span></span></p>
+<p><img src="file:////images/monte-carlo-methods/CDF04.png?" alt="Figure 4: the probability distribution &quot;function&quot; of a dice (in red) and its associated CDF (in green)."></p>
+<p>We have summed up the probabilities of the first N given possible outcomes (where N in this example is equal to 4). If we plot the result of this summation for Pr(X &lt;=1), Pr(X &lt;= 2), ... up to Pr(X &lt;= 6), we get the diagram in Figure 4, which as you can guess, is the CDF (in green) of the probability function (in red) of our random variable. It is easier to explain the use of CDFs using a discrete random variable (our dice example), however, keep in mind that the idea applies to both discrete and continuous probability functions. For example, If we say that the standard normal distribution is the PDF of any given continuous random variable X, then we now know how to use its CDF to answer a question such as: what is the probability that X takes on any value lower or equal to 0?</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>Pr</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>X</mi><mo>&lt;</mo><mo>=</mo><mn>0</mn><mo stretchy="false">)</mo><mtext>  </mtext><mo stretchy="false">?</mo></mrow><annotation encoding="application/x-tex">\Pr(X &lt;= 0)\;?
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">Pr</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">0</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mclose">?</span></span></span></span></span></p>
+<p>The answer is the sum of all the probabilities for this random variable X to take on any value lower or equal to 0. We also know that the PDF is the function that &quot;describes&quot; the probability of these &quot;continuous&quot; outcomes. Thus all we need to do is, sum up this probability from say -5 to 0 (as explained before we chose -5 because the PDF is very close to 0 for any value lower than -5). To do that, we can use the Riemann sum method for example, which we described earlier. If you look at the blue curve in Figure 3 (which is the actual CDF of the standard normal distribution function), then you can see that at x = 0, the CDF is equal to 0.5. Thus, the answer to this question is 0.5.</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>Pr</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>X</mi><mo>&lt;</mo><mo>=</mo><mn>0</mn><mo stretchy="false">)</mo><mo>=</mo><mi>C</mi><mi>D</mi><mi>F</mi><mo stretchy="false">(</mo><mn>0</mn><mo stretchy="false">)</mo><mo>=</mo><mn>0.5.</mn></mrow><annotation encoding="application/x-tex">\Pr(X &lt;= 0) = CDF(0) = 0.5.
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">Pr</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">0</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="mopen">(</span><span class="mord">0</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.5.</span></span></span></span></span></p>
+<p>This is an example of what CDFs are useful for, but they are most useful to us (as in people interested in computer-generated graphics) for their use in a technique called the inverse transform sampling method we are now going to describe.</p>
+<details>
+Note that CDFs are (always) [monotonically increasing functions](http://en.wikipedia.org/wiki/Monotonic_function) (which means that the PDF is always non-negative). It's not strictly monotonic though. There may be intervals of constancy. Also from a mathematical point of view, a PDF can be seen as the derivative of its CDF:
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>p</mi><mi>d</mi><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mi>d</mi><mrow><mi>d</mi><mi>x</mi></mrow></mfrac><mi>c</mi><mi>d</mi><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">pdf(x) = { d \over {dx} } cdf(x).
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mord mathnormal" style="margin-right:0.10764em;">df</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.0574em;vertical-align:-0.686em;"></span><span class="mord"><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="mord mathnormal">x</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span><span class="mord mathnormal">c</span><span class="mord mathnormal" style="margin-right:0.10764em;">df</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span><span class="mord">.</span></span></span></span></span></p>
+</details>
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>

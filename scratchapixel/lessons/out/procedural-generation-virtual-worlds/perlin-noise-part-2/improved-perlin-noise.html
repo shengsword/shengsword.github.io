@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>The smoothstep function is not ideal&comma; and here is why&period;&period;&period;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <p>A few years later (in fact, in 2002, so 17 years after Perlin published his first paper on noise), Perlin proposed a new, improved version of his noise function. The original noise function has two problems.</p>
+<h2 id="the-smoothstep-function-is-not-ideal-and-here-is-why">The smoothstep function is not ideal, and here is why...</h2>
+<p>First, remember that the interpolant we used to interpolate the result of the dot product between the gradients and the vectors pointing toward the point within the cell is the smoothstep function. This function has the form (3t^2 - 2t^3). Remember that we used the derivative of this function ((6t - 6t^2)) to compute the Noise function partial derivatives. As explained in the previous chapter, these derivatives are useful to compute the &quot;true&quot; normal (true as in mathematically correct) of vertices displaced by a noise function. Now the problem with this is that the derivative of the smoothstep function derivative (what we call in mathematics the second order derivative or (f''(x))) is not continuous when (t=0) or (t=1). The second-order derivative of the smoothstep function is (6 - 12t). So when (t=0) (f''(x)=6) and when (t=1), (f''(x)=-6). This is a problem because if the derivative of the function used to compute the normal of the displaced mesh is not continuous, then it will introduce a discontinuity in these normals wherever (t=0) and (t=1). That happens when the vertices of the displaced mesh are aligned with the edges of the noise grid cells (i.e., when the vertex's coordinates have integer values). These visual artifacts are visible in the image below (left).</p>
+<p>It is essential to understand that while the analytical solution to compute the noise function derivative is correct mathematically; this doesn't mean that the result is necessarily visually what we look for. This is nothing more than a mathematical construct and may have properties we don't like. So while the results are mathematically correct, they create visual artifacts we would instead prefer to avoid.</p>
+<p><img src="file:////images/noise-part-2/noise-discontinuity2.png?" alt=""></p>
+<p>Furthermore, most documents mentioning the problem of this function don't explain why we have this problem and provide a way of visualizing it. To better understand why the problem is there in the first place, you need to remember a detail about functions and function derivatives. In physics, a standard function is a function that allows you to compute the <strong>position</strong> of a moving object as a function of time. Let's call this function (p(t)). If you recall your lessons on physics, you can compute the <strong>speed</strong> of this object as the derivative of this function with respect to time, in other words, (p'(t)=p(t)/\partial t). And finally, you can compute the object <strong>acceleration</strong> as the derivative of the speed function with respect to time again or (p''(t)=p'(t)/\partial t). So, in essence you can see a function (f(x)) and its derivatives (f'(x)) and (f''(x)) as, respectively the position, the speed, and the acceleration of an object. In our example, the smoothstep function is, by analogy, the position, the first-order derivative of the smoothstep function that we used to compute the tangent is the speed, and finally the second-order derivative of the smoothstep function is the acceleration. Of course, these are just analogies. But the point is, if the acceleration has discontinuities, then we can expect the speed to change abruptly from time to time. In our particular case, if the smoothstep function second order derivative has discontinuities, then we can expect the tangent to vary abruptly from time to time. And that's precisely what causes the visual artifacts at the cell boundaries. The normals in these regions change suddenly.</p>
+<details>
+In computer graphics and mathematics, when the original function is continuous, we speak of geometry continuity, and we say the function is C0 (or G0 when we deal with geometry). If the function derivative is continuous, we speak of tangent continuity (C1 or G1). And when the function second order derivative is also continuous, we speak of curvature continuity; in other word, the curvature where two curves or two surfaces join is the same for the curves or two surfaces at the point of contact).
+</details>
+<p>The image below shows a slice of the noise function and its analytically computed normals. It is clear that the orientation of the normals and the direction of these are not the same on each side of the cell boundary.</p>
+<p><img src="file:////images/noise-part-2/noise-discontinuity.png?" alt=""></p>
+<p><img src="file:////images/noise-part-2/noise-curves.png?" alt="Figure 1: bicubic (smoothstep) and quintic interpolant."></p>
+<p>Hopefully, there is a solution. Well, if the only problem is that the second-order derivative of the smoothstep function is discontinuous, then all we need to do to fix the problem is to choose a function for the interpolant with a second-order derivative, obviously, continuous. There are quite a few of them that have a similar shape to the smoothstep function, but Perlin choose this quintic function (figure 1):</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mn>6</mn><msup><mi>t</mi><mn>5</mn></msup><mo>−</mo><mn>15</mn><msup><mi>t</mi><mn>4</mn></msup><mo>+</mo><mn>10</mn><msup><mi>t</mi><mn>3</mn></msup><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">6t^5-15t^4+10t^3.
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9474em;vertical-align:-0.0833em;"></span><span class="mord">6</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">5</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.9474em;vertical-align:-0.0833em;"></span><span class="mord">15</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">4</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8641em;"></span><span class="mord">10</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span><span class="mord">.</span></span></span></span></span></p>
+<p>Its first-order derivative is:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mn>30</mn><msup><mi>t</mi><mn>4</mn></msup><mo>−</mo><mn>60</mn><msup><mi>t</mi><mn>3</mn></msup><mo>+</mo><mn>30</mn><msup><mi>t</mi><mn>2</mn></msup><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">30t^4-60t^3+30t^2.
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9474em;vertical-align:-0.0833em;"></span><span class="mord">30</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">4</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.9474em;vertical-align:-0.0833em;"></span><span class="mord">60</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8641em;"></span><span class="mord">30</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mord">.</span></span></span></span></span></p>
+<p>And its second-order derivative is:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mn>120</mn><msup><mi>t</mi><mn>3</mn></msup><mo>−</mo><mn>180</mn><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>60</mn><mi>t</mi><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">120t^3-180t^2+60t.
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9474em;vertical-align:-0.0833em;"></span><span class="mord">120</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.9474em;vertical-align:-0.0833em;"></span><span class="mord">180</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">60</span><span class="mord mathnormal">t</span><span class="mord">.</span></span></span></span></span></p>
+<p>As you can see, this function is continuous (when t=0 and t=1, the function is equal to 0).</p>
+<p><img src="file:////images/noise-part-2/noise-discontinuity1.png?" alt=""></p>
+<h2 id="choosing-random-gradients-is-not-ideal-and-here-is-why">Choosing random gradients is not ideal, and here is why...</h2>
+<p>The next problem is that because the gradients are chosen randomly, sometimes the gradient directions are aligned along the same axis or along the cell's diagonal, as shown in figure 2 [missing]. The noise function tends to take on very high values in these regions (close to 1), causing the &quot;splotchy appearance&quot; of the original Noise implementation in parts.</p>
+<p>Hopefully, this problem can be solved easily by replacing the 256 random directions with a set of 12 directions that are different from each other (excluding situations in which these gradients would point along the same direction). The permutation table provides plenty of randomnesses, so it doesn't matter if these 12 vectors are predefined. Perlin, in his 2002 paper, decided to choose the following vectors:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.16em" columnalign="left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo><mo separator="true">,</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo separator="true">,</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{array}{l}
+(1,1,0),(-1,1,0),(1,-1,0),(-1,-1,0),\\
+(1,0,1),(-1,0,1),(1,0,-1),(-1,0,-1),\\
+(0,1,1),(0,-1,1),(0,1,-1),(0,-1,-1)
+\end{array}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:3.6em;vertical-align:-1.55em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">−</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">−</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">−</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">−</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mclose">)</span><span class="mpunct">,</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">−</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">−</span><span class="mord">1</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">−</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">−</span><span class="mord">1</span><span class="mclose">)</span><span class="mpunct">,</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">−</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">−</span><span class="mord">1</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">−</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">−</span><span class="mord">1</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></p>
+<p><img src="file:////images/noise-part-2/noise-12directions.png?" alt="Figure 3: the 12 directions chosen by Perlin as gradients."></p>
+<p>Though keep in mind that our permutation table returns integers in the range [0,255], so to choose one of these vectors randomly, we would need to do something like <span class="code-inline">P[Hash(x,y,z)] % 12</span>. We don't like to use the modulo operator too much because it's slower than bitwise operators. It requires handling negative values differently than positive ones (bitwise operators fix this problem). To replace the modulo operator with a bitwise operator, Perlin proposes to extend the array of 12 vectors to 16 vectors, adding to the first 12 the following 4 directions:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.16em" columnalign="left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mi mathvariant="normal">.</mi></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{array}{l}
+(1,1,0),(-1,1,0),(0,-1,1), (0,-1,-1).
+\end{array}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.85em;"><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">−</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">−</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">−</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">−</span><span class="mord">1</span><span class="mclose">)</span><span class="mord">.</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.35em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></p>
+<p>We already used these directions, but Perlin claims that because the first 12 directions form a regular tetrahedron, adding some of these directions redundantly doesn't introduce any bias in the texture.</p>
+<blockquote>
+<p>The final result has the same non-directional appearance as the original distribution but less clumping.</p>
+</blockquote>
+<p>The splotchy-like appearance is no longer visible (check out the comparison image below). Implementing this change is quite simple. Our hash function returns numbers in the range [0,255], so we need to use another bitwise operator to set this number to the range [0,15].</p>
+<pre><code>uint8_t p = hash(xi, yi, zi) &amp; 15;
+</code></pre>
+<p>Then note that because all directions are defined with 0 and 1, the dot product is simplified into a sum of the coordinates of the right-hand vector.</p>
+<pre><code>// float a = dot(c000, p000);
+// float a = c000.x * p000.x + c000.y * p000.y + c000.z * p000.z;
+// for the gradient (1, 1, 0), for instance, this simplifies to:
+float a = 1 * p000.x + 1 * p000.y + 0 * p000.z = p000.x + p000.y; 
+</code></pre>
+<p>We can move this code into its function:</p>
+<pre><code>float gradientDotV( 
+    // a value between 0 and 255 
+    uint8_t perm, 
+    // vector from one of the corners of the cell to the point where the noise function is computed
+    float x, float y, float z) 
+{ 
+    switch(perm &amp; 15) { 
+        case  0: return  x + y;  //(1,1,0) 
+        case  1: return -x + y;  //(-1,1,0) 
+        case  2: return  x - y;  //(1,-1,0) 
+        case  3: return -x - y;  //(-1,-1,0) 
+        case  4: return  x + z;  //(1,0,1) 
+        case  5: return -x + z;  //(-1,0,1) 
+        case  6: return  x - z;  //(1,0,-1) 
+        case  7: return -x - z;  //(-1,0,-1) 
+        case  8: return  y + z;  //(0,1,1), 
+        case  9: return -y + z;  //(0,-1,1), 
+        case 10: return  y - z;  //(0,1,-1), 
+        case 11: return -y - z;  //(0,-1,-1) 
+        case 12: return  y + x;  //(1,1,0) 
+        case 13: return -x + y;  //(-1,1,0) 
+        case 14: return -y + z;  //(0,-1,1) 
+        case 15: return -y - z;  //(0,-1,-1) 
+    } 
+} 
+ 
+float eval(...) 
+{ 
+    ... 
+    float a = gradientDotV(hash(xi0, yi0, zi0), x0, y0, z0); 
+    float b = gradientDotV(hash(xi1, yi0, zi0), x1, y0, z0); 
+    float c = gradientDotV(hash(xi0, yi1, zi0), x0, y1, z0); 
+    float d = gradientDotV(hash(xi1, yi1, zi0), x1, y1, z0); 
+    float e = gradientDotV(hash(xi0, yi0, zi1), x0, y0, z1); 
+    float f = gradientDotV(hash(xi1, yi0, zi1), x1, y0, z1); 
+    float g = gradientDotV(hash(xi0, yi1, zi1), x0, y1, z1); 
+    float h = gradientDotV(hash(xi1, yi1, zi1), x1, y1, z1); 
+    ... 
+}
+</code></pre>
+<p>The image below shows a comparison between the original Perlin noise implementation (left) and the improved version (right):</p>
+<p><img src="file:////images/noise-part-2/noise-compare.png?" alt=""></p>
+<p>While not significantly different, the two implementations give different results. The improved version creates vertical and horizontal lines you don't see in the original version. This is because, in the enhanced version, the gradients are aligned along the xy, xz, and yz planes. While choosing a quintic function as an interpolant definitely reduces the visual artifacts and can be called an improvement, using predefined gradients over random gradients is not necessarily good. You can find the complete implementation of the improved version in the last chapter of this lesson.</p>
+<pre><code>inline 
+float quintic(const float &amp;t) 
+{ 
+    return t * t * t * (t * (t * 6 - 15) + 10); 
+} 
+ 
+inline 
+float quinticDeriv(const float &amp;t) 
+{ 
+    return 30 * t * t * (t * (t - 2) + 1); 
+} 
+ 
+class PerlinNoise 
+{ 
+    ... 
+    /* inline */ 
+    uint8_t hash(const int &amp;x, const int &amp;y, const int &amp;z) const 
+    { return permutationTable[permutationTable[permutationTable[x] + y] + z]; } 
+ 
+    float gradientDotV( 
+        // a value between 0 and 255
+        uint8_t perm, 
+        // vector from one of the corners of the cell to the point where the noise function is computed
+        float x, float y, float z) const 
+    { 
+        switch (perm &amp; 15) { 
+            case  0: return  x + y;  //(1,1,0) 
+            case  1: return -x + y;  //(-1,1,0) 
+            case  2: return  x - y;  //(1,-1,0) 
+            case  3: return -x - y;  //(-1,-1,0) 
+            case  4: return  x + z;  //(1,0,1) 
+            case  5: return -x + z;  //(-1,0,1) 
+            case  6: return  x - z;  //(1,0,-1) 
+            case  7: return -x - z;  //(-1,0,-1) 
+            case  8: return  y + z;  //(0,1,1), 
+            case  9: return -y + z;  //(0,-1,1), 
+            case 10: return  y - z;  //(0,1,-1), 
+            case 11: return -y - z;  //(0,-1,-1) 
+            case 12: return  y + x;  //(1,1,0) 
+            case 13: return -x + y;  //(-1,1,0) 
+            case 14: return -y + z;  //(0,-1,1) 
+            case 15: return -y - z;  //(0,-1,-1) 
+        } 
+    } 
+ 
+    float eval(const Vec3f &amp;p, Vec3f&amp; derivs) const 
+    { 
+        int xi0 = ((int)std::floor(p.x)) &amp; tableSizeMask; 
+        int yi0 = ((int)std::floor(p.y)) &amp; tableSizeMask; 
+        int zi0 = ((int)std::floor(p.z)) &amp; tableSizeMask; 
+ 
+        int xi1 = (xi0 + 1) &amp; tableSizeMask; 
+        int yi1 = (yi0 + 1) &amp; tableSizeMask; 
+        int zi1 = (zi0 + 1) &amp; tableSizeMask; 
+ 
+        float tx = p.x - ((int)std::floor(p.x)); 
+        float ty = p.y - ((int)std::floor(p.y)); 
+        float tz = p.z - ((int)std::floor(p.z)); 
+ 
+        float u = quintic(tx); 
+        float v = quintic(ty); 
+        float w = quintic(tz); 
+ 
+        // generate vectors going from the grid points to p
+        float x0 = tx, x1 = tx - 1; 
+        float y0 = ty, y1 = ty - 1; 
+        float z0 = tz, z1 = tz - 1; 
+ 
+        float a = gradientDotV(hash(xi0, yi0, zi0), x0, y0, z0); 
+        float b = gradientDotV(hash(xi1, yi0, zi0), x1, y0, z0); 
+        float c = gradientDotV(hash(xi0, yi1, zi0), x0, y1, z0); 
+        float d = gradientDotV(hash(xi1, yi1, zi0), x1, y1, z0); 
+        float e = gradientDotV(hash(xi0, yi0, zi1), x0, y0, z1); 
+        float f = gradientDotV(hash(xi1, yi0, zi1), x1, y0, z1); 
+        float g = gradientDotV(hash(xi0, yi1, zi1), x0, y1, z1); 
+        float h = gradientDotV(hash(xi1, yi1, zi1), x1, y1, z1); 
+ 
+        float du = quinticDeriv(tx); 
+        float dv = quinticDeriv(ty); 
+        float dw = quinticDeriv(tz); 
+ 
+        float k0 = a; 
+        float k1 = (b - a); 
+        float k2 = (c - a); 
+        float k3 = (e - a); 
+        float k4 = (a + d - b - c); 
+        float k5 = (a + f - b - e); 
+        float k6 = (a + g - c - e); 
+        float k7 = (b + c + e + h - a - d - f - g); 
+ 
+        derivs.x = du *(k1 + k4 * v + k5 * w + k7 * v * w); 
+        derivs.y = dv *(k2 + k4 * u + k6 * w + k7 * v * w); 
+        derivs.z = dw *(k3 + k5 * u + k6 * v + k7 * v * w); 
+ 
+        return k0 + k1 * u + k2 * v + k3 * w + k4 * u * v + k5 * u * w + k6 * v * w + k7 * u * v * w; 
+    } 
+    ... 
+};
+</code></pre>
+<h2 id="whats-next">What's Next?</h2>
+<p>This concludes our lesson on Perlin noise. The lesson is extensive already, but there is undoubtedly a lot more to say about noise functions. First, quite a few more ways of generating procedural noise exist. Some other standard methods are the <strong>wavelet noise</strong> (developed by Pixar), the <strong>Gabor noise</strong>, and the <strong>simplex noise</strong>, which is also a kind of noise created by Ken Perlin. We will write lessons on each one of these techniques in the future.</p>
+<p>Finally, judging the quality of noise implementation against others is essential. How do we do that? We already mentioned the qualities that a noise function should have although. Among these qualities, the noise should have a distribution of frequencies as uniform as possible and yet still appear random and smooth. One way to determine whether a given noise function fits this criterion is to analyze its output in the frequency domain. We will also learn about this technique in future lessons.</p>
+<h2 id="how-to-use-the-noise-function">How to Use the Noise Function?</h2>
+<p>A procedural noise function, in general, can be used for many things:</p>
+<ul>
+<li>Terrain: in this lesson, we just studied the implementation of the function itself, though <a href="/lessons/procedural-generation-virtual-worlds/perlin-noise-part-2/perlin-noise-terrain-mesh">we also showed how to use it to create something like a terrain</a>. We haven't shown yet how to create terrains with really intricate and realistic surface details using the noise function. We will show this technique in a separate lesson yet to be published.</li>
+<li>Water surfaces can also be used to simulate a water surface. By offsetting the y coordinative of the input point, it is possible to animate the displaced surface like waves. This simple technique works well though there are better methods to simulate water surfaces.</li>
+<li>Procedural noise can also be used to add surface details to volumes such as cloud. We use the noise function in the lesson on volume rendering to simulate the appearance of various cloudy shapes.</li>
+<li>Texturing: finally, it can be used, of course, to add texture details to surfaces. It can be used to modulate any input of the shader, such as the color, the specular, or add some bump to the surface of an object.</li>
+<li>Animation: the noise function can also add some noise to animations. A typical use case, for example, is to add some noise to a camera animation to simulate some camera shakes.</li>
+</ul>
+<h2 id="references">References</h2>
+<p><em>Improving Noise</em>. Ken Perlin (2002)</p>
+<p><em>State of the Art in Procedural Noise Functions</em>. A. Lagae and al. (2010)</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>

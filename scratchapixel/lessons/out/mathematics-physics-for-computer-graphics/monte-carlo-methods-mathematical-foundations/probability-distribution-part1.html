@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Probability Distribution</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h2 id="probability-distribution">Probability Distribution</h2>
+<p>The concept of probability distribution is very important (and play a central role in the importance sampling method). We introduce it here in this chapter rather than later, because, you should give to this concept and the concept of random variable the same attention, and actually see them both as part of a whole (or at least as being interconnected). Remember how we mentioned in the previous chapter that a random variable is some sort of function mapping outcomes to real values but also how probabilities are associated to these outcomes. For a die or a coin, the outcomes are equally likely to happen (where the outcomes can either be any number between 1 and 6, or heads or tails) thus we have shown in this case that the probability associated with each outcome is (1\over n), where (n) is the total number of possible outcomes (6 in the case of a die, 2 in the case of coin). Since each outcome has an associated probability (which you can see as a set of pairs of outcomes and their associated probabilities), we can plot these probability values vs. the possible outcome values. In statistics, this is what we call a <strong>probability distribution</strong>. We will give a more formal definition later on, but let's study a couple of cases first.</p>
+<h2 id="example-1">Example 1</h2>
+<p>When we used the example of a coin or a die in the previous chapter, we already introduced you somehow to the concept of probability distribution by showing you two graphs which we are reproducing here:</p>
+<p><img src="file:////images/monte-carlo-methods/prob1.png?" alt=""></p>
+<p>These probability distributions are pretty boring because each possible outcome from the experiment has the same probability. Probability distributions look more interesting though when the outcomes of an experiment have different probabilities. Let's study an example of such distribution. Remember the experiment we described in the previous chapter in which we had 10 cards, of which 3 were labeled with the number 0, 5 were labeled with the number 1, and 2 were labeled with the number 2. If you place these cards in a box, shake the box, etc. you will (hopefully) agree that each card in the box is equally likely to be randomly picked up. If we consider the sample as being (S = {0, 0, 0, 1, 1, 1, 1, 1, 2, 2}) (the order in this set doesn't matter, the numbers could be presented in a completely different order), then each outcome in this set has the associated probability (1\over 10). In probability theory, when we consider the probability of getting either one outcome or another, the probability of getting any of these two outcomes is the sum of their probabilities (we will study the properties of probability in the next chapter). This is known as the <strong>addition rule</strong>. In other words, if you were interested in knowing what is the probability of either getting a 2 or a 5 when you roll a die, this probability is the sum of getting a 2 (which we know is (1\over 6)) and the probability of getting a 5 ((1\over 6) again), that is (2 \over 6). Applied to our cards example, the probability of getting a card labeled 0 is the sum of the probabilities of each card in the set labeled 0, and the probability of getting a 1, is the sum of the probabilities of each card in the set labeled 1, etc. If we reduce our sample space to the space of elementary events then we get (S = {0, 1, 2}), and the probability of either getting a 0 a 1, or a 2 is (3 \over 10), (5 \over 10) and (2\over 10) respectively. If we now plot these probabilities as a function of the outcome, we get the following more interesting graph:</p>
+<p><img src="file:////images/monte-carlo-methods/prob2.png?" alt=""></p>
+<p>Note that the contrary of other functions, the dots corresponding to each pair outcome-probability are not linked because we are dealing in these particular cases with discrete random variables. For continuous random variables, the probability distribution function is represented as a curve (but more on this topic in the next lesson). Hopefully, with this example, you start to get the meaning of this function. It defines or describes a distribution of probabilities across the sample space of an experiment. When applied to discrete random variables, this function is called a <strong>probability mass function</strong> (or <strong>pmf</strong>). Here is finally a more formal definition of a probability distribution.</p>
+<p>!!!
+In probability and statistics, a probability distribution assigns a probability to each measurable subset of the possible outcomes of a random experiment. The distribution can be discrete, or continuous. A discrete distribution can be characterized by its probability (distribution) function, which specifies the probability that the random variable takes each of the different possible values.
+!!!</p>
+<p>Before we move to the next example, note how the sum of all the probabilities is equal to 1. Indeed we will show in the next chapter that this is a property of probabilities. A probability can never be greater than 1 and the probabilities of an experiment sum to 1.</p>
+<h2 id="example-2">Example 2</h2>
+<p>In probability theory when a random process has only two outcomes (such as &quot;heads&quot; or &quot;tails&quot;, &quot;success&quot; or &quot;failure&quot;) then we speak of a <a href="http://en.wikipedia.org/wiki/Bernoulli_trials"><strong>Bernoulli</strong> (or <strong>binomial</strong>) <strong>trial</strong></a>. In the coin experiment, these two outcomes occur with the same probability ((\scriptsize p = {1 \over 2 })) but in the more generic case, we say they occur with probability p and 1 - p (the sum of probabilities is 1). But what is for example the probability of getting 4 heads if I toss the coin 6 times? Note that the possible outcomes of this experiment (tossing 6 times and counting heads) can now either be 0, 1, 2, 3, 4, 5, or 6. First, if you now consider an experiment in which (n) random samples are drawn from, the probability distribution of a <a href="http://en.wikipedia.org/wiki/Bernoulli_trials">Bernoulli trial</a>, where each sample can take a value of 0 or 1, then the sum of this \ (N) samples can be written as:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>S</mi><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msub><mi>x</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">S = \sum_{i=1}^N x_i
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.106em;vertical-align:-1.2777em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.8283em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mrel mtight">=</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span><span style="top:-4.3em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.10903em;">N</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.2777em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p>Let's say that we want to find the probability that (S = n), where (n \leq N), which is the probability that (n) of the (N) samples take on the value of 1, and (N- n ) samples take on the value of 0. In mathematics, this discrete (because (n) takes on discrete values) probability distribution is called a <strong>binomial distribution</strong> and can be analytically calculated with the following equation:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>P</mi><mi>r</mi><mo stretchy="false">(</mo><mi>S</mi><mo>=</mo><mi>n</mi><mo stretchy="false">)</mo><mo>=</mo><msubsup><mi>C</mi><mi>n</mi><mi>N</mi></msubsup><msup><mi>p</mi><mi>k</mi></msup><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><msup><mo stretchy="false">)</mo><mrow><mo stretchy="false">(</mo><mi>N</mi><mo>−</mo><mi>n</mi><mo stretchy="false">)</mo></mrow></msup></mrow><annotation encoding="application/x-tex">Pr(S = n) = C_n^N p^k(1-p)^{(N-n)}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.1491em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8913em;"><span style="top:-2.453em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.10903em;">N</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8991em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.188em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.938em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.10903em;">N</span><span class="mbin mtight">−</span><span class="mord mathnormal mtight">n</span><span class="mclose mtight">)</span></span></span></span></span></span></span></span></span></span></span></span></span></p>
+<p>for n = 0, 1, 2, ..., N, where:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msubsup><mi>C</mi><mi>n</mi><mi>N</mi></msubsup><mo>=</mo><mfrac><mrow><mi>N</mi><mo stretchy="false">!</mo></mrow><mrow><mi>n</mi><mo stretchy="false">!</mo><mo stretchy="false">(</mo><mi>N</mi><mo>−</mo><mi>n</mi><mo stretchy="false">)</mo><mo stretchy="false">!</mo></mrow></mfrac><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">C_n^N = {{N!}\over{n!(N-n)!}}.
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.1383em;vertical-align:-0.247em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8913em;"><span style="top:-2.453em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.10903em;">N</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.3074em;vertical-align:-0.936em;"></span><span class="mord"><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="mclose">!</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal">n</span><span class="mclose">)!</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mclose">!</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span><span class="mord">.</span></span></span></span></span></p>
+<p>The expression (x!) is called the factorial of x. It is equal to the product of all positive integers less than or equal to x. For example: (\scriptsize 5! = 5 * 4 * 3 * 2  * 1 = 120). The term (C_n^N) counts the number of ways in which (n) of the (N) samples can take on the value of 1. In the case of a fair coin probability p is equal to (1\over 2). In our example, we toss the coin 6 times thus n=6, and k can take any value between 0 and 6. For example, if we set k=3, the binomial distribution would give us the probability that we would get 3 heads if we were to flip the coin 6 times. We can write a small C++ program to compute all the probabilities for each value of k between 0 and 6:</p>
+<pre><code>#include &lt;random&gt; 
+#include &lt;cstdlib&gt; 
+#include &lt;cstdio&gt; 
+#include &lt;iostream&gt; 
+ 
+inline uint64_t fact(uint64_t x) { 
+  return (x &lt;= 1 ? 1 : x * fact(x - 1)); 
+} 
+ 
+int main(int argc, char **argv) 
+{ 
+    uint64_t N = atoi(argv[1]); 
+    uint64_t Nfac = fact(N); 
+    for (uint64_t n = 0; n &lt;= N; ++n) { 
+        uint64_t CnN = Nfac / (fact(n) * fact(N-n)); 
+        double prob = CnN * powf(0.5, n) * powf(1 - 0.5, N - n); 
+        std::cout &lt;&lt; n &lt;&lt; &quot; &quot; &lt;&lt; prob &lt;&lt; std::endl; 
+    } 
+ 
+    return 0; 
+} 
+</code></pre>
+<p><img src="file:////images/monte-carlo-methods/binomial.png?" alt="Figure 1: probability distribution of a fair coin tossed 6 times. It gives us the probability to get a certain number of heads (where the number can be any value between 0 and 6) after 6 tosses."></p>
+<p>We show the result as a graph in Figure 1. The resulting numbers can be seen as the frequency of getting a certain random variable. For example, the first column gives us the frequency of getting no heads after 6 tosses (this probability is 0.015625). The second column gives the probability of getting 1 head after 6 tosses (0.093750), etc. Another way of seeing this is to say that 1.5% of the time you will get 0 heads, 9.3% of the time you will get 1 head, 23% of the time you will 2 heads, 31% of the time you will get 3 heads, etc.</p>
+<p>The reason we studied this example is to show that in example 1 we could easily compute the probability distribution of our random distribution by hand (because the experiment was simple enough), but for some more complex or typical cases, this probability distribution can be computed using mathematical equations (where the parameters of these equations are the experiment's parameters such as how many times do we toss the coin, what's the probability to get &quot;success&quot; in a Bernoulli trial, etc.). And as in any other mathematical equation, changing these parameters do change the &quot;shape&quot; of the probability distribution. Look at this series of three graphs, made from using the binomial distribution equation with different values for the parameter (N):</p>
+<p><img src="file:////images/monte-carlo-methods/binomial2.png?" alt=""></p>
+<p>The values for the probabilities here are not so important. It doesn't matter if you can't read the numbers, all we want you to understand is that the overall shape of the distribution changes as the parameters of the equation change. There is more we could say by just looking at these distributions themselves (for example that they are symmetrical about their central value, either 3, 6, or 10 when the N is set to 6, 12, and 20 respectively, etc.) but let's ignore these observations for now and keep the focus on the idea that some probability distributions can be defined with mathematical equations and that by varying the values of these equations' parameters we can change their shapes. We gave the example of the binomial distribution, but how many more types of distribution can we define using equations? There are quite a few but what's probably the most interesting remark to make about this is that some probability distributions in nature are very common and probability one of the most common and useful ones is known as the <strong>normal</strong> or <strong>gaussian distribution</strong>. The normal distribution is very similar to the binomial distribution but where the binomial distribution applies to discrete random variables, the normal distribution applies to continuous random variables. We won't provide the equation for the normal distribution in this chapter because it uses two parameters called the mean and the standard deviation which we haven't introduced yet (check the chapter <a href="/lessons/mathematics-physics-for-computer-graphics/monte-carlo-methods-mathematical-foundations/probability-distribution-part2">probability distribution: part 2</a> to get the equation). But these concepts will be explained in the next chapter. For now, we will just show what the normal distribution looks like:</p>
+<p><img src="file:////images/monte-carlo-methods/normaldistribution.png?" alt=""></p>
+<p>It doesn't matter at this point if you don't know how to create this curve, just compare its shape with the shape of the three binomial probability distributions shown above, especially with the graph at the bottom (when N=20). You can see that the overall shape is the same. As mentioned, the normal probability distribution is the counterpart of the binomial distribution for continuous random variables (thus logically they do have the same shape, but rather than just being discrete pairs, probabilities are expressed as a curve).</p>
+<p>The other basic probability distribution which we have already been exposed to with the example of the die and the coin is called the <strong>discrete uniform distribution</strong> (its continuous counterpart is given the name of continuous uniform distribution). This distribution applies to any experiment in which each of the possible outcomes is equally likely to happen, and every one of these (n) outcomes has probability (1\over n). A <strong>simple sample space</strong> is given to a sample space in which the probability assigned to each outcome (s_1, s_2, ..., s_n) is (1\over n). Another common probability distribution in computer graphics is the Poisson distribution but don't worry too much about it for now. We will come across this name again when we get to the lesson on sampling. A list of probability distributions can be found <a href="http://en.wikipedia.org/wiki/List_of_probability_distributions">here</a>.</p>
+<p>Before we can study some of the properties of a probability distribution that are useful to understand the Monte Carlo method, we first need to learn more about the properties of probabilities, as well as introduce some important concepts from probability theory and statistics. Let's move on to the next chapter then.</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>

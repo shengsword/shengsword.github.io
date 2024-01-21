@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Preamble&colon; Structure of this Lesson and Approach</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h2 id="preamble-structure-of-this-lesson-and-approach">Preamble: Structure of this Lesson and Approach</h2>
+<p>Volume rendering (technically, using the term <strong>participating media</strong> instead of the term volume would be better) is a topic almost as large and as complex as hard surface rendering. It has its own set of equations which are in fact, almost a generalization of the equations used to describe how light interacts with hard matter. They can be overwhelming for readers that are not necessarily comfortable with such complex mathematical formulations.</p>
+<p>True to the way we teach things on Scratchapixel, we chose a &quot;bottom-up&quot; approach to the challenge of teaching volume rendering. Or to say it differently, a practical approach. Rather than starting from the equations and diving into them, we will instead write code to render a simple volumetric sphere and explain things along the way in a hopefully intuitive way. Then everything we learned to that point will be summed up and formalized at the end of the lesson.</p>
+<p>Several lessons will be devoted to volume rendering (it is a vast topic). In this introductory lesson, we will study the foundations of volume rendering and ray-marching. The next lessons will be devoted to other possible methods for rendering volumes, global illumination applied to participating medium, multiple scattering, formats used to store volume data such as OpenVDB, etc.</p>
+<p>If you are interested in volume rendering, you might also want to check the lesson <a href="/lessons/procedural-generation-virtual-worlds/simulating-sky/">Simulating the Colors of the Sky</a>. The sky is a kind of volume.</p>
+<h2 id="introduction">Introduction</h2>
+<p>Our aim in the first two chapters of this lesson is to learn how to render a volume shaped like a sphere illuminated by a single light source on a uniformly colored background. This will help us get a first intuitive understanding of what volumes are and introduce the ray-marching algorithm that we will be used to render them.</p>
+<p>In this particular chapter, we will just render a plain volume with uniform density. We will ignore shadows cast by objects from outside or from within the volume as well as how to render volume with varying densities. These will be studied in the next chapters.</p>
+<p>Instead of providing a lot of detailed background about what volumes are and the equations used to render them, let's dive straight into implementation and derive a more formal understanding of volume rendering from there.</p>
+<p><img src="file:////images/volume-rendering-developers/voldev-example.png?" alt=""></p>
+<h2 id="internal-transmittance-absorption-particle-density-and-the-beers-law">Internal Transmittance, Absorption, Particle Density, and the Beer's Law</h2>
+<p>Light reaching our eyes as a result of light being reflected by an object or being emitted by a light source is likely to be absorbed as it travels through a volume of space filled up with some particles. The more particles we have in the volume, the more opaque the volume. From this simple observation, we can lay down some fundamental concepts related to volume rendering: absorption, transmission, and the relationship between how opaque a volume is and the density of particles it contains. For now, we will consider that the density of particles contained by the volume is uniform.</p>
+<p><img src="file:////images/volume-rendering-developers/voldev-L0term1.png?" alt=""></p>
+<p>As light travels through the volume in the direction of our eye (which is how images of objects we are seeing are formed in our eye), some of it will be absorbed by the volume as it passes through it. This phenomenon is called <strong>absorption</strong>. What we are interested in (for now) is the amount of light that's being transmitted from the background through the volume. We speak of <strong>internal transmittance</strong> (the amount of light being absorbed by the volume as it travels through it). Internal transmittance can be seen as a value going from 0 (the volume blocks all light) to 1 (well, it's a vacuum so all light is transmitted).</p>
+<p>The amount of light that's being transmitted through that volume is governed by the <strong>Beer-Lambert law</strong> (or Beer's law for short). In the Beer-Lambert law, the concept of density is expressed in terms of the absorption coefficient (and scattering coefficient but we will introduce the scattering coefficient later in this chapter). Which you can understand as, &quot;the denser the volume, the higher the absorption coefficient&quot;; and as you can guess intuitively, the volume gets more opaque as the absorption coefficient increases. The Beer-Lambert law equation looks like this:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>T</mi><mo>=</mo><mi>e</mi><mi>x</mi><mi>p</mi><mo stretchy="false">(</mo><mo>−</mo><mi>d</mi><mi>i</mi><mi>s</mi><mi>t</mi><mi>a</mi><mi>n</mi><mi>c</mi><mi>e</mi><mo>∗</mo><msub><mi>σ</mi><mi>a</mi></msub><mo stretchy="false">)</mo><mo>=</mo><msup><mi>e</mi><mrow><mo stretchy="false">(</mo><mo>−</mo><mi>d</mi><mi>i</mi><mi>s</mi><mi>t</mi><mi>a</mi><mi>n</mi><mi>c</mi><mi>e</mi><mo>∗</mo><msub><mi>σ</mi><mi>a</mi></msub><mo stretchy="false">)</mo></mrow></msup></mrow><annotation encoding="application/x-tex">T = exp(-distance * \sigma_a)=e^{(-distance * \sigma_a)}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">e</span><span class="mord mathnormal">x</span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord">−</span><span class="mord mathnormal">d</span><span class="mord mathnormal">i</span><span class="mord mathnormal">s</span><span class="mord mathnormal">t</span><span class="mord mathnormal">an</span><span class="mord mathnormal">ce</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">a</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.938em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.938em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">(</span><span class="mord mtight">−</span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">an</span><span class="mord mathnormal mtight">ce</span><span class="mbin mtight">∗</span><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1645em;"><span style="top:-2.357em;margin-left:-0.0359em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight">a</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span><span class="mclose mtight">)</span></span></span></span></span></span></span></span></span></span></span></span></span></p>
+<p>The law states that there is an exponential dependence between the internal transmittance, (T), of light through a volume and the product of the <strong>absorption coefficient</strong> of the volume, (\sigma_a) (the Greek letter sigma), and the distance the light travels through the material (i.e. the path length).</p>
+<p>The unit of these coefficients is a reciprocal distance or inverse length such as (cm^{-1}) or (m^{-1}) (this doesn't matter, it is just a matter of scale). This is important because it helps get an intuitive sense of what information these coefficients hold. You can consider the absorption coefficient (and the scattering coefficient that we will introduce later) as a probability or likelihood if you prefer that a random event occurs (e.g. the photon is absorbed or scattered) at any given point/distance.</p>
+<p>The absorption and scattering coefficient are said to express a <a href="https://en.wikipedia.org/wiki/Probability_density_function">probability density</a> (just in case you want to do more research on this topic). As it is a probability it should not exceed 1 however, this depends on the unit in which it is measured. For example, if you used millimeters you might get 0.2 for a given medium. But expressed in centimeter and meter this would become 2 and 20 respectively. So in practice, nothing stops you from using values greater than 1.</p>
+<details>
+<summary>Relationship between the coefficients and the mean free path.</summary>
+The fact that the unit of the absorption and scattering coefficients is inverse length is important because if you take the inverse of the coefficients (1 over the absorption of scattering coefficient) you get a distance. This distance called the mean free path represents the average distance at which a random event occurs:
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>mean free path</mtext><mo>=</mo><mfrac><mn>1</mn><msub><mi>σ</mi><mi>s</mi></msub></mfrac></mrow><annotation encoding="application/x-tex">\text{mean free path} = { {1}\over{\sigma_s}}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord text"><span class="mord">mean free path</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.1574em;vertical-align:-0.836em;"></span><span class="mord"><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.836em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></span></p>
+<p>This value plays an important role in simulating multiple scattering in participating media. Check the lessons on subsurface scattering and advanced volume rendering to learn more about these very cool topics.</p>
+</details>
+<p><img src="file:////images/volume-rendering-developers/voldev-expfunction.png" alt="Figure 1: the greater the distance or the greater the density the lower the internal transmittance value."></p>
+<p>The greater the absorption coefficient or the distance, the smaller T. The Beer-Lambert law equation returns a number in the range 0-1. If the distance or the absorption coefficient is 0, the equation returns 1. For very large numbers of either the distance or the density, T gets closer to 0. For a fixed distance, T decreases as we increase the absorption coefficient. For a fixed absorption coefficient, T decreases as we increase the distance. The further light travels in the volume, the more it gets absorbed. The more particles in the volume, the more light gets absorbed. Simple. You can see this effect in Figure 1.</p>
+<details>
+<summary>Beer & gemstones.</summary>
+An absorbing-only medium is transparent (not translucid) but dims images seen through it (e.g.: beer, wine, gemstones, tinted glass).
+</details>
+<h2 id="rendering-a-volume-over-a-uniform-background">Rendering a Volume Over a Uniform Background</h2>
+<p>It's easy to start from here. Imagine we have a slab of volume whose thickness and density are known. Say 10 and 0.1 respectively. Then if the background color (light reflected by a wall for example that we are looking at) is (xr, xg, xb), how much of that background color we see through the volume is:</p>
+<pre><code>vec3 background_color {xr, xg, xb};
+float sigma_a = 0.1; // absorption coefficient
+float distance = 10;
+float T = exp(-distance * sigma_a);
+vec3 background_color_through_volume = T * background_color;
+</code></pre>
+<p>It can not be simpler.</p>
+<h2 id="scattering">Scattering</h2>
+<p>Note that until now we have assumed that our volume is black. In other words, we just darken the background color wherever our slab is. But the volume doesn't have to be. Volume like solid objects reflects (or scatters more precisely) light too. That's why, when you look at a cloud on a sunny day, you can see the shape of the cloud almost as if it was a solid object. Volumes can also emit light (think of a candle flame) which we are just mentioning for the sake of completeness but we will ignore emission in this chapter. So let's assume our slab of volume has a certain color say (yr, yg, yb). We will ignore where that color comes from for now; we will explain it later in the chapter. Let's just say until then that our volume has some color as a result of the volumetric object &quot;reflecting&quot; light (not really but let's go with the concept of &quot;reflection&quot; like with solid objects for now) that's illuminating it like with solid objects. Then our code becomes:</p>
+<pre><code>vec3 background_color {xr, xg, xb}; 
+float sigma_a= 0.1; 
+float distance = 10; 
+float T = exp(-distance * sigma_a); 
+vec3 volume_color {yr, yg, yb}; 
+vec3 background_color_through_volume = T * background_color + (1 - T) * volume_color; 
+</code></pre>
+<p>Think of it as the process of blending (A+B) images in Photoshop for example using alpha blending. Say you want to add image B over A, where A is the background image (our blue wall) and B is the image of a red disk with a transparency channel. The formula to combine these two images would be:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>C</mi><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>B</mi><mi mathvariant="normal">.</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>n</mi><mi>s</mi><mi>p</mi><mi>a</mi><mi>r</mi><mi>e</mi><mi>n</mi><mi>c</mi><mi>y</mi><mo stretchy="false">)</mo><mo>∗</mo><mi>A</mi><mo>+</mo><mi>B</mi><mi mathvariant="normal">.</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>n</mi><mi>s</mi><mi>p</mi><mi>a</mi><mi>r</mi><mi>e</mi><mi>n</mi><mi>c</mi><mi>y</mi><mo>∗</mo><mi>B</mi></mrow><annotation encoding="application/x-tex">C = (1 - B.transparency) * A + B.transparency * B
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mord">.</span><span class="mord mathnormal">t</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">an</span><span class="mord mathnormal">s</span><span class="mord mathnormal">p</span><span class="mord mathnormal">a</span><span class="mord mathnormal">re</span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.03588em;">cy</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">A</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mord">.</span><span class="mord mathnormal">t</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">an</span><span class="mord mathnormal">s</span><span class="mord mathnormal">p</span><span class="mord mathnormal">a</span><span class="mord mathnormal">re</span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.03588em;">cy</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span></span></span></span></span></p>
+<p>Where Transparency here is the 1 - Transmission (also called opacity) and B is the color of our volume object (light that's being &quot;reflected&quot; by the volume and traveling towards our eyes/camera). We will get back to this when we get to the ray-marching algorithm; for now, keep this in mind.</p>
+<h2 id="rendering-our-first-volume-sphere">Rendering our First Volume Sphere</h2>
+<p>We have all we need to render our first 3D image. We will render a sphere that we assume is filled with some particles using what we have learned so far. We will assume that we are rendering our sphere over some background. The principle is very simple. We first check for an intersection between our camera ray and the sphere. If there's no intersection, then we simply return the background color. If there is an intersection, we then calculate the points on the surface of the sphere where the ray enters and leaves the sphere. From there, we can compute the distance that the ray travels through the sphere and apply Beer's law to compute how much of the light is being transmitted through the sphere. We will assume that light &quot;reflected&quot; (scattered) by the sphere is uniform for now. We will look at lighting later.</p>
+<p><img src="file:////images/volume-rendering-developers/voldev-simplesetup.png" alt="Figure 2: a camera ray passing through a volumetric object."></p>
+<p><img src="file:////images/volume-rendering-developers/voldev-lightpassingthrough.png" alt="Figure 3: we use the intersections points of the camera rays with the volumetric object to compute the opacity of the volumetric object along the camera rays."></p>
+<details>
+<summary>Implementation detail.</summary>
+Technically, we don't need to compute the points where the ray enters and leaves the sphere to get the distance between the points. We simply need to subtract `tmin` from `tmax` (the ray parametric distances along the camera ray where the ray intersects the sphere. In the following example, we calculate them to emphasize that what we care about here is the distance between these two points.
+</details>
+<pre><code>class Sphere : public Object 
+{ 
+public: 
+    bool intersect(vec3, vec3, float, float) const { /* compute ray-sphere intersection */ } 
+    float sigma_a{ 0.1 }; 
+    vec3 scatter{ 0.8, 0.1, 0.5 }; 
+    vec3 center{ 0, 0, -4 }; 
+    float radius{ 1 }; 
+}; 
+ 
+void traceScene(vec3 ray_origin, vec3d ray_direction, const Sphere *sphere) 
+{ 
+    float t0, t1; 
+    vec3 background_color { 0.572, 0.772, 0.921 }; 
+    if (sphere-&gt;intersect(rayOrigin, rayDirection, t0, t1)) { 
+        vec3 p1 = ray_origin + ray_direction * t0; 
+        vec3 p2 = ray_origin + ray_direction * t1; 
+        float distance = (p2 - p1).length();  // though you could simply do t1 - t0 
+        float tranmission = exp(-distance * sphere-&gt;sigma_a); 
+        return background_color * transmission + sphere-&gt;scatter * (1 - transmission); 
+    } 
+    else 
+       return background_color; 
+} 
+ 
+void renderImage() 
+{ 
+    Sphere *sphere = new Sphere; 
+    for (each row in the image) 
+        for (each column in the image) 
+            vec3 ray_dir = computeRay(col, row); 
+            pixel_color = traceScene(ray_orig, ray_dir, sphere); 
+            image_buffer[...] = pixel_color;  // store pixel color in image buffer 
+ 
+    saveImage(image_buffer); 
+    ... 
+} 
+</code></pre>
+<p>Quite logically, as the density increases, the transmission gets closer to 0 which means that the color of the volumetric sphere dominates over that of the background.</p>
+<p><img src="file:////images/volume-rendering-developers/voldev-simplevolspheres.png?" alt=""></p>
+<p>You can see in the images above, that the volume gets more opaque towards the center of the sphere (where the distance traveled by the ray through the sphere is the greatest. You can also see that as the density increases (as sigma_a increases), the sphere becomes more opaque overall. Eureka! You've just rendered your first volumetric sphere and you are halfway to becoming a volume rendering expert.</p>
+<h2 id="lets-add-light-in-scattering">Let's add light! In-Scattering</h2>
+<p>So far we have a nice image of a volumetric sphere, but what about lighting? If we shine a light onto a volumetric object, we can see that parts of the volume that are more directly exposed to light are brighter than those that are in shadows. Volumes too are illuminated by lights. How do we account for that?</p>
+<p>The principle is very simple. Let's imagine the fate of light emitted by a light source traveling through the volume. As it travels through the volume, its intensity gets attenuated due to absorption. And not surprisingly enough, how much is left of the light energy after it has traveled a certain distance in the volume is ruled by Beer's law. In other words, if we know the distance light traveled through the volume, its intensity at that distance is:</p>
+<pre><code>float light_intensity = 10; // just a number, it could be anything 
+float T = exp(-distance_travelled_by_light * volume-&gt;absorption_coefficient); 
+light_intensity_attenuation = T * ligth_intensity;
+</code></pre>
+<p>So first thing first, light energy decreases as it travels through the volume according to Beer's law. That's pretty logical. But something else also happens: light emitted by a light source that is not initially traveling toward the eye, can also be redirected toward the eye (at least part of it as we will see) as a result of what we call the scattering effect. We speak in this particular case of <strong>in-scattering</strong>. In-scattering refers to light passing through a volume, that's being redirected toward the eyes due to a scattering event. This effect is illustrated in Figure 4. A scattering event is the result of an interaction between a photon and a particle/atom making up the medium/volume. Rather than being absorbed or reflected (which can happen too), the atom just &quot;spits out&quot; the photon in a direction that's different from its incoming direction. We will learn more about this phenomenon in the next chapters.</p>
+<p><img src="file:////images/volume-rendering-developers/voldev-inscattering.png" alt="Figure 4: light we are seeing through volumetric objects comes from the background objects (here the blue color) as well as from light sources. Even though light beams when emitted by the light source are not traveling to the eye, some quantity of light is being redirected to the eye as it passes through the volumetric object due to the in-scattering effect."></p>
+<p>If you look at Figure 4, note that light that arrives at the eye (along the particular eye/camera ray that is drawn in blue in the figure), is a combination of light coming from the background (our blue background) and light coming from the light source scattered towards the eye due to in-scattering (the yellow ray).</p>
+<p>So how do we account for the contribution of a light source? We need to &quot;measure&quot; light that's being scattered towards the eye (along with the camera rays) as the effect of in-scattering. The problem is that we need to account for that effect along the entire part of the camera rays that are intersecting the sphere (Figure 5). We need to <strong>&quot;integrate&quot;</strong> light that's being in-scattered along the camera ray, over the range t0-t1.</p>
+<p><img src="file:////images/volume-rendering-developers/voldev-raymarching1.png" alt="Figure 5: we need to integrate the light that's be redirected towards the eye due to in-scattering along the segment of the ray that passes through the volumetric object."></p>
+<p>To solve this problem, we will divide the section of the camera ray that's passing through the volume into a certain number of segments (our samples if you wish) and compute how much light arrives at the center of each one of these segments (sample) using the following procedure (see Figure 6 for a visual representation of the concept):</p>
+<ul>
+<li>
+<p>We shoot a ray from that sample point (let's call it X) toward the light source to compute the distance from the sample point to the sphere boundary (let's call this point P). Note that X is always inside the sphere (our volume) and P is always a point on the surface of the sphere.</p>
+</li>
+<li>
+<p>Then apply Beer's law to know by how much the light energy was attenuated as it traveled from P (the point where this light ray entered the sphere) to X (the point along the eye ray where this light ray was scattered towards the viewer).</p>
+</li>
+</ul>
+<p><img src="file:////images/volume-rendering-developers/voldev-lightintegral1.png" alt="Figure 6: marching along the ray in regular steps to estimate our integral using a Riemann sum."></p>
+<p><img src="file:////images/volume-rendering-developers/voldev-lightintegral2.png" alt="Figure 7: we can estimate the area under the curve that represents the amount of light scattered along the camera using a Riemann sum. The idea is to break the area under the curve into a sum of small rectangles. The height of each rectangle is given by Li(x) and the width, dx, is user defined."></p>
+<p>To understand the type of problem we are solving here, we need to look at Figures 6 and 7. Figure 6 shows the incoming light arriving along the camera ray which, as you can see in the bottom part of the figure, is a continuous function. Let's call this function Li(x) where x here is any point along the camera ray contained within the range t0-t1. What we need to compute is the &quot;area&quot; below the curve. In mathematics, it is an integral that we can write as:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msubsup><mo>∫</mo><mrow><mi>x</mi><mo>=</mo><msub><mi>t</mi><mn>0</mn></msub></mrow><msub><mi>t</mi><mn>1</mn></msub></msubsup><mi>L</mi><mi>i</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mi>d</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">\int_{x=t_0}^{t_1} Li(x) dx
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:2.5555em;vertical-align:-1.012em;"></span><span class="mop"><span class="mop op-symbol large-op" style="margin-right:0.44445em;position:relative;top:-0.0011em;">∫</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.5435em;"><span style="top:-1.7881em;margin-left:-0.4445em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">x</span><span class="mrel mtight">=</span><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3173em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span><span style="top:-3.8129em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3173em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.012em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">L</span><span class="mord mathnormal">i</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span><span class="mord mathnormal">d</span><span class="mord mathnormal">x</span></span></span></span></span></p>
+<p>As we just said, the result of an integral (which is a number) is defined to be the (net signed) area under the curve (the function Li(x)) as illustrated in Figure 6. The problem in our case is that we can't compute this area using an analytical solution. But we can use a trick to approximate this area by breaking it down into simpler shapes we know the area of rectangles (as shown in Figure 7). We sample Li(x) along the curve at regular intervals which we know the width of (dx) and the area of the resulting rectangle can then be computed as Li(x) multiplied by dx (x is in the middle of the interval). By summing up the area of all the rectangles, we get an approximation of the area under the curve. Et voila! This technique is known as the Riemann sum (the idea of approximating a shape whose area we don't know with areas we do know goes back to the Greeks).</p>
+<details>
+<summary>Going further.</summary>
+You can find more information on integrals and how to compute them in the lesson ["Mathematics of Shading"](/lessons/mathematics-physics-for-computer-graphics/mathematics-of-shading/).
+</details>
+<p>So how does it translate into code?</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>

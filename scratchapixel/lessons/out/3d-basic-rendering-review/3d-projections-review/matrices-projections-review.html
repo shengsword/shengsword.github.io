@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Exercise Description</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h2 id="exercise-description">Exercise Description</h2>
+<p>This first exercise aims to project 4 vertices (that are making 2 triangles) onto an image plane and store the result in a PPM file. We will be provided with the 4 vertices' positions, the index array (the indices defining how these vertices are connected to form triangles), and the camera-to-world transformation matrix. We will also be provided with the horizontal field of view and the image dimensions.</p>
+<p>Here is the info in code form:</p>
+<pre><code>float vertices[12] =
+
+uint32_t index[6] = {};
+
+float cam_to_world[16] = {};
+float vertical_field_of_view = 45; // in degrees
+float znear = 0.1;
+float zfar = 100;
+
+uint32_t width = 640, height = 480;
+</code></pre>
+<p>Here is the image you shall match:</p>
+<p>![]{}</p>
+<p>As we progress with the solution, links to lessons in which you can find specific information concerning a given technique or method will also be provided. As we go along, we will introduce you to some math libraries that have been quite popular in the CG community. Finally, we will see how some of the functions we need to solve this exercise are implemented in these libraries.</p>
+<h2 id="solution">Solution</h2>
+<p>When such an exercise is given to you, the process by which you project points onto a screen should come as an automatism. For example, on Stackoverflow, an OP <a href="https://gamedev.stackexchange.com/questions/201552/when-moving-the-camera-should-one-move-the-projection-matrix-or-move-the-world/204025#204025">asked</a> &quot;When moving the &quot;camera&quot; should one move the projection matrix or move the world?&quot;.</p>
+<blockquote>
+<p>I'm making my game engine as an exercise, and I need clarification on what I've read so far. For example, do I move the world or the camera's position when I want to move my camera? OpenGL tutorials and Scratchapixel state that you move the world, not the camera. But that confuses me. Wouldn't it be simpler to move the camera instead of, for example, applying millions of additions in worlds as big as Minecraft? What about VR headsets? Those have two cameras. How do they do it? Is there something I'm missing, or it just works like this?</p>
+</blockquote>
+<p>This is a good starting point and opportunity to try explaining the process again.</p>
+<ul>
+<li>
+<p>When we create a 3D scene, we have objects whose vertices are defined in world space. Objects may be moved in the world using an <code>object-to-world</code> transformation matrix, but we will ignore this point. Instead, we will assume that all objects in the scene have their vertices defined in world space. Fine. Now the next step is to look at that scene through a camera. The camera will only look at a given part of the scene from a given point of view. To do so, we need to move the camera around into the scene like we do when we move our mobile phone to take a picture in the real world (or a DSLR camera if you have one). So far, so good. When you create the camera by default, it is centered at the world origin (and therefore has coordinates 0,0,0) and looks down the z-axis. That's what we need to do in principle, or to say it differently, how you can look at the process of framing a 3D scene with a virtual camera. We still need to explain how to render an image of the scene as seen through the camera. You can look at a 3D scene as some geometry whose vertices are defined in world space and a camera somehow located in that scene.</p>
+<p>Remember, Scratchapixel uses a right-hand coordinate system, with the y-axis looking up, the x-axis pointing to the right, and the z-axis toward you, the viewer.</p>
+<p>The transformation applied to the camera (translation, rotation, remember, no scale on a camera) can be baked in (for convenience) into a 4x4 matrix that we call the <code>camera-to-world</code> matrix. Why <code>camera</code>? Because it was in the default camera position originally. Why <code>world</code>? Because we moved it to a different position in the world.</p>
+<p>So what do we have at the end of that process? Objects' vertices in world space (their positions are defined with respect to the world's origin) and a <code>camera-to-world</code> matrix that defines the camera position and orientation into the scene with respect to that world origin. Great.</p>
+</li>
+<li>
+<p><strong>Now comes the time to render the 3D scene as viewed through the camera</strong>. To do so, we will apply the <code>world-to-camera</code> matrix to the scene's vertices. The <code>world-to-camera</code> is the <code>camera-to-world</code> inverse matrix. You can look at the process as if we were moving the entire scene, the objects and the camera included, to put the camera back into its default position and orientation. Note that in the process, as the objects' vertices are moving with the camera, what you see through the camera doesn't change. For example, if you hold an object in front of your mobile phone and move around, as the object moves with the camera, it will not move in the frame. This is illustrated in the short video below.</p>
+<p>Yes, sure, it may seem like a lot of calculations, but there is a reason why we do so. That is because projecting points onto the camera's image plane becomes very simple when we are in that configuration. It is reduced to simply dividing the vertices' x and y coordinates by their respective z coordinates. This is known as the <strong>z or perspective divide</strong> -- a fundamental process in creating CG images. Again projecting a point onto the camera screen is reduced to two simple divisions. And how do we move &quot;the entire world's geometry&quot; into camera space? By transforming the objects' vertices in world space with the <code>world-to-camera</code> matrix, of course (the inverse of the <code>camera-to-world</code> matrix).</p>
+<p>Now, there's a reason why we use a perspective projection matrix rather than simply dividing the points' x and y coordinates by their respective z-coordinate. The perspective projection not only does the z-divide for us but also encodes in the projection process the camera field of view, the image aspect ratio (and additionally remaps the depth of the point with respect to the camera's to the [0,1] or [-1,1] range depending on the preferred convention).</p>
+</li>
+</ul>
+<iframe class="video" src="/images/projecting-3Dpoints-review/proj-review-world-to-cam-example.mp4" frameborder="0" allowfullscreen></iframe>
+<p>!!!
+Note that all real-time APIs are working that way. We (developers) make them work that way because modern real-time APIs all have a programmable pipeline. So it's our responsibility to calculate the <code>world_to_camera</code> and the perspective projection matrix and pass them on to what's typically called a <strong>vertex shader</strong> whose primary function is precisely to project the vertices making up the models on the camera image plane. These matrices are often combined in a matrix commonly referred to (in code and the literature) as the <code>model_view</code> matrix. This matrix generally encodes the object-to-world matrix (this transforms the object's vertices from object space to world space), the world-to-camera matrix, and finally, the perspective (or orthographic) matrix. So three matrices in one. Here is an example of such a vertex shader in the WGLS format (where again <code>model_view_matrix</code> is the result of the projection matrix multiplied by the <code>world_to_camera</code> matrix multiplied by the <code>object_to_world</code> matrix - the model part in the matrix):</p>
+<pre><code>struct Uniforms {
+	object_to_world : mat4x4&lt;f32&gt;,
+	world_to_camera : mat4x4&lt;f32&gt;,
+	projection : mat4x4&lt;f32&gt;,
+}
+
+@binding(0) @group(0) var&lt;uniform&gt; uniforms : Uniforms;
+
+@vertex fn main(@location(0) pos: vec3&lt;f32&gt;)
+	-&gt; @builtin(position) {
+	return uniforms.projection * uniforms.world_to_camera * object_to_world * vec4&lt;f32&gt;(pos, 1.0); 	
+})&quot;);
+</code></pre>
+<p>It doesn't matter if your scene has zillions of polygons like Minecraft because GPUs are optimized to make that process light speed fast. The entire point of GPUs is that they are designed to run such operations (transforming a vertex in the image plane of the frame buffer) in parallel on a gazillion of processors. They have been designed so that making this projection step could be done as efficiently as possible, and while it may seem inefficient to process potentially millions of vertices, it succeeds in rendering 3D scenes, including potentially complex ones, in real-time; this is exactly how it works when you play Minecraft or look at some 3D scenes in VR (at 60 fps in stereo).
+!!!</p>
+<p>In summary, when you want to project a point onto the image plane of a camera, you need to apply the following steps:</p>
+<ol>
+<li>Transform the object's vertices into camera space using the <code>world-to-camera</code> matrix.</li>
+<li>Project the vertices in camera space onto the screen of the image plane using the perspective projection matrix.</li>
+</ol>
+<p>To solve our exercise, we will use the following tools:</p>
+<ol>
+<li>We only have the <code>camera-to-world</code> matrix. So we will need some code to compute the matrix inverse. This will give us the <code>world-to-camera</code> matrix. Finding the inverse of a matrix was explained in the lesson <a href="/lessons/mathematics-physics-for-computer-graphics/matrix-inverse/matrix-inverse">Matrix Inverse: Gauss-Jordan Method</a></li>
+<li>We will need some code to transform points by matrices. To find out to transform points and vectors with matrices, please refer to the lesson on <a href="/lessons/mathematics-physics-for-computer-graphics/geometry/transforming-points-and-vectors">Geometry</a>.</li>
+<li>We will need some code to build a perspective projection matrix. This function will take, as input parameters, the camera field of view, the image aspect ratio, and the znear and zfar clipping planes. The lesson <a href="/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/opengl-perspective-projection-matrix">The Perspective and Orthographic Projection Matrix</a> provides detailed information on this topic.</li>
+</ol>
+<p>Let's build these elements step by step.</p>
+<h2 id="calculating-the-inverse-of-a-matrix">Calculating the Inverse of a Matrix</h2>
+<p>As examples of libraries that implement a matrix transformation, we will limit ourselves, in this case, to <strong>Imath</strong>. Imath is a library initially developed by ILM (Industrial Light and Magic), a California-based VFX studio responsible for some of the most iconic visual effects of all times. It has designed and produced visual effects for films such as Terminator, Jurassic Park, and the Star Wars franchise.</p>
+<p>Imath was the foundation upon which ILM later released other open-source projects. Namely OpenEXR. Both Imath and OpenEXR are not managed by the <a href="https://www.aswf.io/">Academy Software Foundation</a> and can be found on GitHub at this <a href="https://github.com/AcademySoftwareFoundation/imath">link</a>. Imath is quite popular in the CG industry, particularly within VFX and animation studios' software departments, and can often be used or referenced by other projects such as OpenVDB or USD.</p>
+<p>As its name suggests and as mentioned, Imath focuses on providing a rich library of math functions and tools, including vector, point, and matrix manipulation, among the most important. One particularity of the library is that it supports the type <code>half</code>, real numbers that use half as many bytes as standard floats. This was devised to support float images (exr files) that were not as heavy as if their pixels had been stored using floats.</p>
+<p>Imath supports the two common methods for inverting matrices: the Gauss-Jordan method (the only method currently explained on Scratchapixel) and the determinant-based method (that we will present in the future revision of the lesson on matrix inversion).</p>
+<p>Let's look at the code of the matrix inversion method using the Gauss-Jordan method provided by Imath:</p>
+<pre><code>template &lt;class T&gt;
+inline Matrix44&lt;T&gt;
+Matrix44&lt;T&gt;::gjInverse (bool singExc) const
+{
+    int      i, j, k;
+    Matrix44 s;
+    Matrix44 t (*this);
+
+    // Forward elimination
+
+    for (i = 0; i &lt; 3; i++)
+    {
+        int pivot = i;
+
+        T pivotsize = t.x[i][i];
+
+        if (pivotsize &lt; 0) pivotsize = -pivotsize;
+
+        for (j = i + 1; j &lt; 4; j++)
+        {
+            T tmp = t.x[j][i];
+
+            if (tmp &lt; 0) tmp = -tmp;
+
+            if (tmp &gt; pivotsize)
+            {
+                pivot     = j;
+                pivotsize = tmp;
+            }
+        }
+
+        if (pivotsize == 0)
+        {
+            if (singExc)
+                throw std::invalid_argument (&quot;Cannot invert singular matrix.&quot;);
+
+            return Matrix44 ();
+        }
+
+        if (pivot != i)
+        {
+            for (j = 0; j &lt; 4; j++)
+            {
+                T tmp;
+
+                tmp           = t.x[i][j];
+                t.x[i][j]     = t.x[pivot][j];
+                t.x[pivot][j] = tmp;
+
+                tmp           = s.x[i][j];
+                s.x[i][j]     = s.x[pivot][j];
+                s.x[pivot][j] = tmp;
+            }
+        }
+
+        for (j = i + 1; j &lt; 4; j++)
+        {
+            T f = t.x[j][i] / t.x[i][i];
+
+            for (k = 0; k &lt; 4; k++)
+            {
+                t.x[j][k] -= f * t.x[i][k];
+                s.x[j][k] -= f * s.x[i][k];
+            }
+        }
+    }
+
+    // Backward substitution
+
+    for (i = 3; i &gt;= 0; --i)
+    {
+        T f;
+
+        if ((f = t.x[i][i]) == 0)
+        {
+            if (singExc)
+                throw std::invalid_argument (&quot;Cannot invert singular matrix.&quot;);
+
+            return Matrix44 ();
+        }
+
+        for (j = 0; j &lt; 4; j++)
+        {
+            t.x[i][j] /= f;
+            s.x[i][j] /= f;
+        }
+
+        for (j = 0; j &lt; i; j++)
+        {
+            f = t.x[j][i];
+
+            for (k = 0; k &lt; 4; k++)
+            {
+                t.x[j][k] -= f * t.x[i][k];
+                s.x[j][k] -= f * s.x[i][k];
+            }
+        }
+    }
+
+    return s;
+}
+</code></pre>
+<p>If you follow the steps, you will hopefully recognize everything we have described in the lesson on matrix inversion:</p>
+<ul>
+<li>We start with the matrix we which to invert and a matrix set to identity.</li>
+<li>Step 1: we swap rows if necessary to get the largest possible value for the pivot for the processed row.</li>
+<li>Step 2: we eliminate all elements in the matrix below the diagonal (forward elimination).</li>
+<li>Step 3: we set the elements along the diagonal to 1.</li>
+<li>Step 4: we eliminate all numbers above the diagonal (backward substitution).</li>
+</ul>
+<p>The only difference with our implementation is that in step 4, Imath processes the column in reverse order, starting at index 3 and going down to 0. There is a slight implementation detail here. Because the index in the loop is decreasing and the loops stop with the index lower than 0 exactly, the index can't be of type <code>uint32_t</code>. It needs to be of type <code>int</code>. Using an <code>uint32_t</code> and going from 0 to 3 would probably be a better choice. This is a small example of the difference that may exist between various implementations and make one implementation better than others. Besides that detail, the Imath code is rather easy to read. So let's write a simple <code>Matrix44f</code> class and use this function.</p>
+<p>For reference, you can also look at how Imath implements points and vectors.</p>
+<pre><code>class Matrix44f
+{
+public:
+    float matrix[4][4];
+};
+
+int main()
+{
+	Matrix44f cam_to_world({});
+	Matrix44f world_to_cam = cam_to_world.Inverse();
+	std::cerr &lt;&lt; world_to_cam &lt;&lt; std::endl;
+
+	// Project vertices
+	// TODO
+	
+	return 0;
+}
+</code></pre>
+<p>We now have the right matrix to transform the vertices from world to camera space.</p>
+<pre><code>int main()
+{
+    ...
+	// Project vertices
+	Point3f vertices[4] = {{}, {}, {}, {}};
+	for (uint32_t i = 0; i &lt; 4; ++i) {
+	    Point3f vertex_camera = vertices[i] * world_to_camera;
+        ...
+	}
+	...
+}
+
+</code></pre>
+<h2 id="building-a-perspective-projection-matrix">Building a Perspective Projection Matrix</h2>
+<p>We have already learned about perspective projection matrices. For this part of the exercise, we will look at another open-source library called <strong>GLM</strong>. The acronym stands for OpenGL Mathematics (as it was initially developed to be compatible with the OpenGL shading language GLSL). GLM is also commonly used in the industry but may be more commonly encountered in the personal projects of developers/engineers and in the game industry (many 3D-related projects on GitHub are using it). Here is a <a href="https://github.com/g-truc/glm">link</a> to the library on GitHub.</p>
+<p>Similarly to Imath, GLM provides everything you need to manipulate a point, vector, and matrices. Still, it also provides a wide range of functions, including creating projection matrices.</p>
+<p>The reason why GLM is popular is that it is quite exhaustive. For example, when it comes to projection matrices, GLM provides the possibility between several different options:</p>
+<ul>
+<li>Whether you want a matrix working with left-hand rule coordinate.</li>
+<li>Whether you want a matrix working with a right-hand rule coordinate.</li>
+<li>A matrix that remaps depth values from 0 to 1.</li>
+<li>A matrix that remaps depth values in the range -1 to 1.</li>
+</ul>
+<p>GLM provides a function for each possible combination of these options.</p>
+<ul>
+<li><code>perspectiveRH_ZO</code></li>
+<li><code>perspectiveRH_NO</code></li>
+<li><code>perspectiveLH_ZO</code></li>
+<li><code>perspectiveLH_NO</code></li>
+</ul>
+<p>Where <code>LH</code> and <code>RH</code> stand for left-hand and right-hand, and <code>ZO</code> and <code>N0</code> stand for zero to one and a negative one (to one, that is).</p>
+<p>These functions can be found in <code>/glm/ext/matrix_clip_space.inl</code> (the <code>.inl</code> extension here defines inline functions. The file can be included in a header to get inline functions and in a .c file to get regular function definitions). For example, here is the function as defined in the GLM library that generates a perspective projection matrix for a <strong>right-hand coordinate system</strong> (the convention used by Scratchapixel) in which the depth values are remapped from 0 to 1:</p>
+<pre><code>template&lt;typename T&gt;
+GLM_FUNC_QUALIFIER mat&lt;4, 4, T, defaultp&gt; perspectiveRH_ZO(T fovy, T aspect, T zNear, T zFar)
+{
+	assert(abs(aspect - std::numeric_limits&lt;T&gt;::epsilon()) &gt; static_cast&lt;T&gt;(0));
+
+	T const tanHalfFovy = tan(fovy / static_cast&lt;T&gt;(2));
+
+	mat&lt;4, 4, T, defaultp&gt; Result(static_cast&lt;T&gt;(0));
+	Result[0][0] = static_cast&lt;T&gt;(1) / (aspect * tanHalfFovy);
+	Result[1][1] = static_cast&lt;T&gt;(1) / (tanHalfFovy);
+	Result[2][2] = zFar / (zNear - zFar);
+	Result[2][3] = - static_cast&lt;T&gt;(1);
+	Result[3][2] = -(zFar * zNear) / (zFar - zNear);
+	return Result;
+}
+</code></pre>
+<p>As you can see, it's best to know about things such as the right and left-hand coordinate systems. The remapping between 0 to 1 or -1 to 1 is a matter of preference. There are small differences related to precision, etc., but we will get into these details later. This won't change the visual result.</p>
+<p>This looks a bit different than the code provided in the lesson on the <a href="/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/opengl-perspective-projection-matrix">Perspective Projection Matrix</a>, but that's only because our code was decomposing the construction of the matrix in two steps: in step 1, we calculated the camera frustum coordinates (top, bottom, left, right as shown in the figure below) that we then used in step 2 to calculate the matrix. The function provided by GLM combines these steps into one. When you do so, and if you assume that the left/right and top/bottom coordinates of the frustum are symmetrical (left and right have the same absolute value. Top and bottom also), which is almost always the case, you will realize that some terms cancel each other out and that you are left with the function as it in GLM. To prove that point, let's look at the code from another library called GLH. GLH was very popular in the OpenGL times (you can <a href="https://sourceforge.net/projects/glhlib/">download the library from Source Forge</a>). Not that OpenGL is not popular anymore, but it is superseded by modern graphics APIs such as DirectX, Vulkan, or Metal. So yes, OpenGL is now something of the past. But a lot of code was written for OpenGL, and looking at GLH (the ancestor of GLM if you wish) can be super instructive.</p>
+<pre><code>void glhFrustumf(sreal *matrix, sreal left, sreal right, sreal bottom, sreal top, sreal znear, sreal zfar)
+{
+	sreal matrix2[16], temp, temp2, temp3, temp4, resultMatrix[16];
+	temp=2.0*znear;
+	temp2=right-left;
+	temp3=top-bottom;
+	temp4=zfar-znear;
+	matrix2[0]=temp/temp2;
+	matrix2[1]=0.0;
+	matrix2[2]=0.0;
+	matrix2[3]=0.0;
+	matrix2[4]=0.0;
+	matrix2[5]=temp/temp3;
+	matrix2[6]=0.0;
+	matrix2[7]=0.0;
+	matrix2[8]=(right+left)/temp2;
+	matrix2[9]=(top+bottom)/temp3;
+	matrix2[10]=(-zfar-znear)/temp4;
+	matrix2[11]=-1.0;
+	matrix2[12]=0.0;
+	matrix2[13]=0.0;
+	matrix2[14]=(-temp*zfar)/temp4;
+	matrix2[15]=0.0;
+	MultiplyMatrices4by4OpenGL_FLOAT(resultMatrix, matrix, matrix2);
+
+	memcpy(matrix, resultMatrix, 16*sizeof(sreal));
+}
+
+void glhPerspectivef(sreal *matrix, sreal fovyInDegrees, sreal aspectRatio, sreal znear, sreal zfar)
+{
+	sreal ymax, xmax;
+	ymax=znear*tanf(fovyInDegrees*M_PI/360.0);
+	//ymin=-ymax;
+	//xmin=-ymax*aspectRatio;
+	xmax=ymax*aspectRatio;
+	glhFrustumf(matrix, -xmax, xmax, -ymax, ymax, znear, zfar);
+}
+</code></pre>
+<p>In the good old times, you'd construct a perspective projection matrix by calling the <code>glPerspective</code> function (here called <code>glhPerspective</code>). As you can see, it takes a matrix as an input variable, a field of view (in degrees), an image aspect ratio, and a near and far clipping plane. Here, we are in familiar territory. Because we are given the vertical field of view, we will calculate the top coordinate first (here called <code>ymax</code>) using the near and vertical field of view. <code>ymin</code> is <code>-ymax</code>. Multiplying <code>ymax</code> and <code>ymin</code> by the image aspect ratio gives us <code>xmas</code> and <code>xmin</code>, respectively. We then pass left, right, bottom, and top (<code>-xmas</code>, <code>xmas</code>, <code>-ymax</code> and <code>ymax</code> respectively) to <code>glhFrustumf</code> that will use the frustum coordinates to set our final perspective matrix. Not that because <code>xmin = -xmas</code> and <code>yin = -ymax</code>, <code>matrix2[8]=(right+left)/temp2;</code> and <code>matrix2[9]=(top+bottom)/temp3;</code> are equal to 0 (the numerator equals 0 in both cases). If you move the code from <code>glhPerspetivef</code> into <code>glhFrustumf</code> and do the simplifications we spoke about, you will end with <code>perspectiveRH_ZO</code>.</p>
+<pre><code>matrix2[0] = temp / temp2;
+// where temp = temp=2 * znear and temp2 = right - left with right = xmax = aspectRatio * znear * tan(fovy)
+matrix2[0] = 2 * znear / ((aspectRatio * znear * tan(fovy) - - (aspectRatio * znear * tan(fovy));
+matrix2[0] = = 2 * znear / 2 * znear * aspectRatio * tan(fovy);
+matrix2[0] = 1 / aspectRatio * tan(fovy);
+</code></pre>
+<pre><code>matrix2[5] = temp / temp3;
+// where temp = 2 * znear and temp3 = top - bottom with top = znear * tanf(fovy)
+matrix2[5]= 2 * znear / (znear * tan(fovy) - - znear * tan(fovy));
+matrix2[5]= 2 * znear / 2 * znear * tan(fovy);
+matrix2[5]= 1 / tan(fovy);
+</code></pre>
+<pre><code>matrix2[8] = (right + left) / temp2;
+// with right = xmax = aspectRatio * znear * tan(fovy) and left = -right
+matrix2[8]=(xmas + -xmas) / temp2 = 0;
+</code></pre>
+<pre><code>matrix2[9] = (top + bottom) / temp3;
+// with top = ymax = znear * tan(fovy) and bottom = -top
+matrix2[9]=(ymax + -ymax) / temp3 = 0;
+</code></pre>
+<pre><code>matrix2[10] = (-zfar - znear) / temp4; // or -(zfar + znear) / temp4
+// temp4 = zfar-znear
+matrix2[10] = - (zfar + znear) / (zfar - znear);
+</code></pre>
+<p>This part is different from the <code>perspectiveRH_ZO</code> here but that's because <code>glhFrustumf</code> remaps depth in the range [-1,1] whereas <code>perspectiveRH_ZO</code> rempas depth in the range 0 to 1. Here is the code for <code>perspectiveRH_NO</code>.</p>
+<pre><code>template&lt;typename T&gt;
+GLM_FUNC_QUALIFIER mat&lt;4, 4, T, defaultp&gt; perspectiveRH_NO(T fovy, T aspect, T zNear, T zFar)
+{
+	assert(abs(aspect - std::numeric_limits&lt;T&gt;::epsilon()) &gt; static_cast&lt;T&gt;(0));
+
+	T const tanHalfFovy = tan(fovy / static_cast&lt;T&gt;(2));
+
+	mat&lt;4, 4, T, defaultp&gt; Result(static_cast&lt;T&gt;(0));
+	Result[0][0] = static_cast&lt;T&gt;(1) / (aspect * tanHalfFovy);
+	Result[1][1] = static_cast&lt;T&gt;(1) / (tanHalfFovy);
+	Result[2][2] = - (zFar + zNear) / (zFar - zNear);
+	Result[2][3] = - static_cast&lt;T&gt;(1);
+	Result[3][2] = - (static_cast&lt;T&gt;(2) * zFar * zNear) / (zFar - zNear);
+	return Result;
+}
+</code></pre>
+<p>Let's continue:</p>
+<pre><code>matrix2[11]=-1.0; // similar to Result[2][3] = - static_cast&lt;T&gt;(1); in perspectiveRH_ZO
+</code></pre>
+<p>Last:</p>
+<pre><code>matrix2[14] = (-temp * zfar) / temp4;
+// with temp = 2 * znear and temp4 = zfar - znear;
+matrix2[14] = -2 * znear * zfar / (zfar - znear);
+</code></pre>
+<p>Here again the difference with <code>Result[3][2] = -(zFar * zNear) / (zFar - zNear);</code> (note the missing <code>2</code>) has to do with the difference of remapping from 0 to 1 vs -1 to 1.</p>
+<p>So the functions are similar. By the way you might still ask, why is the <code>frustum</code> way of calaculating the perspective matrix useful if we can use a function to calculate that matrix that looks more compact. That's because sometimes (though it's quite uncommon), the top and left and/or top and bottom frustum coordinates are not &quot;symmetrical&quot;. In other words <code>left != -right</code> and/or <code>bottom != -top</code> (you may want to calculate slightly more of the scene on the left or on the right, etc.).</p>
+<p><img src="file:////images/perspective-matrix/projectionOpenGL2.png" alt="Figure xx: The bottom/left and top/right camera frustum's coorddinates"></p>
+<details>
+**If you don't know what the frustum is** and what these left/right, top/bottom coordinates relate to, check the lesson [The Perspective and Orthographic Projection Matrix](/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/).
+</details>
+<p>This shows two things:</p>
+<ul>
+<li>Our code works. All code from other libraries does the same thing. In the end. Hopefully.</li>
+<li>It's really good to know about existing libraries, as they help us learn and check our code. Therefore the more you will know about libraries, the better.</li>
+</ul>
+<p>Great. So we have our <code>world-to-camera</code> matrix, our projection matrix. What are we missing to conclude the mission? Some code for point-matrix and matrix-matrix multiplication. Let's go.</p>
+<h2 id="points-and-matrix-multiplications">Points and Matrix Multiplications</h2>
+<p>Let's look at the Imath code for this. You can also search in the GLM library where this is done, but it's more easily done in Imath.</p>
+<p>For the point matrix multiplication, the Imath code looks like this:</p>
+<pre><code>template &lt;class T&gt;
+template &lt;class S&gt;
+IMATH_HOSTDEVICE inline void
+Matrix44&lt;T&gt;::multVecMatrix (const Vec3&lt;S&gt;&amp; src, Vec3&lt;S&gt;&amp; dst) const
+    IMATH_NOEXCEPT
+{
+    S a, b, c, w;
+
+    a = src.x * x[0][0] + src.y * x[1][0] + src.z * x[2][0] + x[3][0];
+    b = src.x * x[0][1] + src.y * x[1][1] + src.z * x[2][1] + x[3][1];
+    c = src.x * x[0][2] + src.y * x[1][2] + src.z * x[2][2] + x[3][2];
+    w = src.x * x[0][3] + src.y * x[1][3] + src.z * x[2][3] + x[3][3];
+
+    dst.x = a / w;
+    dst.y = b / w;
+    dst.z = c / w;
+}
+</code></pre>
+<p>Imath vector class is called <code>Vec3</code> and be specialized so that its elements x, y, z can either be floats or doubles (hence the template). Note that this method calculates <code>w</code> and add the translation part of the matrix (the elements <code>x[3][0]</code>, <code>x[3][1]</code>, and <code>x[3][2]</code>) to the respective elements of the <code>Vec3</code> instance. You should immediately realize that this function is indeed for points. Remember though from the lesson on Geometry that <code>w</code> is never defined explicitely. Yet, when it comes to transform points by matrices, we need to calculate its value (it is changed by the projection matrix as we will see later). Remember that it also needs to be normalized. As <code>w</code> is discarded at the end of the process, we don't need to explicitely set it to 1, though we need to divide the other vector elements by <code>w</code>.</p>
+<p>Also looking at the code you should immediately notice that Imath uses the <strong>column-major convention</strong>. This is important since if you decide to use it for your own project, you need to be aware of the convention used by Imath of course. Scratchapixel too uses the column-major convention. The vector is on the left of the matrix defined as row of elements. So are the elements of the matrix. In this convention the vector is on the left, the matrix on the right (of course), and we need to multiply for each elements in the transformed point, the elements of the vector by the elements in the matrix' row. For example if you calculate <code>pt.x</code> where <code>pt</code> is <code>p</code> transformed by matrix <code>m</code>, then:</p>
+<p class="katex-block katex-error" title="$pt.x = p.x * m[0][0] + p.y * m[1][0] + p.z * m[2][0] + \color{magenta}{m[3][0]}
+">ParseError: KaTeX parse error: Can&#039;t use function &#039;$&#039; in math mode at position 1: $̲pt.x = p.x * m[…</p>
+<p>Where the last element in the @@\mmagenta@@ color represents the translation part. For <code>pt.y</code>:</p>
+<p class="katex-block katex-error" title="$pt.y = p.x * m[0][1] + p.y * m[1][1] + p.z * m[2][1] + \color{magenta}{m[3][1]}
+">ParseError: KaTeX parse error: Can&#039;t use function &#039;$&#039; in math mode at position 1: $̲pt.y = p.x * m[…</p>
+<p>And so on. If you are not clear with the concept of <strong>row</strong> vs. <strong>column-major</strong> vectors and matrices, please read the lesson on Geometry once more.</p>
+<p>For the sake of completeness, compare the above fuction with the following which is used to transform vectors (aka directions). Note that translations values are ignored as well as the calculation for <code>w</code> and the <code>w</code> divide:</p>
+<pre><code>template &lt;class T&gt;
+template &lt;class S&gt;
+IMATH_HOSTDEVICE inline void
+Matrix44&lt;T&gt;::multDirMatrix (const Vec3&lt;S&gt;&amp; src, Vec3&lt;S&gt;&amp; dst) const
+    IMATH_NOEXCEPT
+{
+    S a, b, c;
+
+    a = src.x * x[0][0] + src.y * x[1][0] + src.z * x[2][0];
+    b = src.x * x[0][1] + src.y * x[1][1] + src.z * x[2][1];
+    c = src.x * x[0][2] + src.y * x[1][2] + src.z * x[2][2];
+
+    dst.x = a;
+    dst.y = b;
+    dst.z = c;
+}
+</code></pre>
+<p>Let's move to the matrix-matrix multiplication. Here is the code from Imath:</p>
+<pre><code>template &lt;class T&gt;
+IMATH_HOSTDEVICE inline IMATH_CONSTEXPR14 Matrix44&lt;T&gt;
+Matrix44&lt;T&gt;::multiply (const Matrix44&amp; a, const Matrix44&amp; b) IMATH_NOEXCEPT
+{
+    const auto a00 = a.x[0][0];
+    const auto a01 = a.x[0][1];
+    const auto a02 = a.x[0][2];
+    const auto a03 = a.x[0][3];
+
+    const auto c00 =
+        a00 * b.x[0][0] + a01 * b.x[1][0] + a02 * b.x[2][0] + a03 * b.x[3][0];
+    const auto c01 =
+        a00 * b.x[0][1] + a01 * b.x[1][1] + a02 * b.x[2][1] + a03 * b.x[3][1];
+    const auto c02 =
+        a00 * b.x[0][2] + a01 * b.x[1][2] + a02 * b.x[2][2] + a03 * b.x[3][2];
+    const auto c03 =
+        a00 * b.x[0][3] + a01 * b.x[1][3] + a02 * b.x[2][3] + a03 * b.x[3][3];
+
+    const auto a10 = a.x[1][0];
+    const auto a11 = a.x[1][1];
+    const auto a12 = a.x[1][2];
+    const auto a13 = a.x[1][3];
+
+    const auto c10 =
+        a10 * b.x[0][0] + a11 * b.x[1][0] + a12 * b.x[2][0] + a13 * b.x[3][0];
+    const auto c11 =
+        a10 * b.x[0][1] + a11 * b.x[1][1] + a12 * b.x[2][1] + a13 * b.x[3][1];
+    const auto c12 =
+        a10 * b.x[0][2] + a11 * b.x[1][2] + a12 * b.x[2][2] + a13 * b.x[3][2];
+    const auto c13 =
+        a10 * b.x[0][3] + a11 * b.x[1][3] + a12 * b.x[2][3] + a13 * b.x[3][3];
+
+    const auto a20 = a.x[2][0];
+    const auto a21 = a.x[2][1];
+    const auto a22 = a.x[2][2];
+    const auto a23 = a.x[2][3];
+
+    const auto c20 =
+        a20 * b.x[0][0] + a21 * b.x[1][0] + a22 * b.x[2][0] + a23 * b.x[3][0];
+    const auto c21 =
+        a20 * b.x[0][1] + a21 * b.x[1][1] + a22 * b.x[2][1] + a23 * b.x[3][1];
+    const auto c22 =
+        a20 * b.x[0][2] + a21 * b.x[1][2] + a22 * b.x[2][2] + a23 * b.x[3][2];
+    const auto c23 =
+        a20 * b.x[0][3] + a21 * b.x[1][3] + a22 * b.x[2][3] + a23 * b.x[3][3];
+
+    const auto a30 = a.x[3][0];
+    const auto a31 = a.x[3][1];
+    const auto a32 = a.x[3][2];
+    const auto a33 = a.x[3][3];
+
+    const auto c30 =
+        a30 * b.x[0][0] + a31 * b.x[1][0] + a32 * b.x[2][0] + a33 * b.x[3][0];
+    const auto c31 =
+        a30 * b.x[0][1] + a31 * b.x[1][1] + a32 * b.x[2][1] + a33 * b.x[3][1];
+    const auto c32 =
+        a30 * b.x[0][2] + a31 * b.x[1][2] + a32 * b.x[2][2] + a33 * b.x[3][2];
+    const auto c33 =
+        a30 * b.x[0][3] + a31 * b.x[1][3] + a32 * b.x[2][3] + a33 * b.x[3][3];
+    return Matrix44 (
+        c00,
+        c01,
+        c02,
+        c03,
+        c10,
+        c11,
+        c12,
+        c13,
+        c20,
+        c21,
+        c22,
+        c23,
+        c30,
+        c31,
+        c32,
+        c33);
+}
+</code></pre>
+<p>Remember from the Geometry lesson that for a matrix-matrix multiplication you need to multiply the elements of each row in the left-hand matrix by each column in the right-hand matrix (assuming you are using a column-major order convention). This can be expressed as follows:</p>
+<pre><code>inline
+Matrix4 Matrix4::operator*(const Matrix4&amp; rhs) const
+{
+    Matrix4 mult;
+    const Matrix4&amp; lhs = *this;
+    for (uint32_t j = 0; j &lt; 4; ++j) {
+		for (uint32_t i = 0; i &lt; 4; ++i) {
+            mult[j][i] = lhs[j][0] * rhs[0][i] + lhs[j][1] * rhs[1][i] + 
+                lhs[j][2] * rhs[2][i] + lhs[j][3] * rhs[3][i];
+        }
+    }
+
+    return mult;
+}
+</code></pre>
+<p>The code from Imath does the same thing as this function, but the two for-loops are unfolded. The unfolded version is preferred in production code because while less compact, by carefully arranging the term, you can avoid a few memeory fetches which should make the function faster to execute. In practice, it's hard to see the different nowardays, as when you write <code>for</code> loops, especially simple ones like the ones we have in matrix-multiplication, modern compilers are likely to do an excellent job at optimzing the code.</p>
+<p>Congratulation. You have all the tools you need. Let's proceed to the final step. Let's project the points.</p>
+<h2 id="processing-vertices-and-converting-them-to-image-space">Processing Vertices and Converting Them to Image Space</h2>
+<p>We now have all the code we need in order to:</p>
+<ul>
+<li>Calculate the world-to-camera matrix.</li>
+<li>calculate the perspective projection matrix.</li>
+<li>Multiply matrices with other matrices and points by matrices.</li>
+</ul>
+<p>All we are left to do is loop through the vertices and:</p>
+<ul>
+<li>Remember that our input vertices are assumed to be in world space. So we first need to transform them to camera space. We do my multiplying the vertices by the <code>world-to-camera</code> matrix.</li>
+<li>Then project the vertices in camera space to screen space using the perspective matrix.</li>
+</ul>
+<p>Okay there's one final step we have considered yet. When vertices are defined in screen space, their coordinates are <strong>necessarily</strong> in the range -1 to 1. Where [-1,-1] being the bottom-left coordinate of the screen and [1,1] being the top-right corner. So we need to remap these coordinates to the image dimension (640x480 in this example). This is simple, however remember that in an image, the pixel located in the top-left coorner of the image has coordinate (0,0) whereas the bottom-right pixel has coordinate (width-1, height-1). In other words, we need to <strong>invert</strong> the y-coordinate in the remapping process like so:</p>
+<pre><code>float pixelCoordX = (pt.x * 0.5 + 0.5) * imageWidth;
+float pixelCoordY = (0.5 - pt.y * 0.5) * imageHeight; // remap 1 to 0 and -1 to imageHeight
+</code></pre>
+<p><img src="file:////images/projecting-3Dpoints-review/screen-pixel-coordinates.png" alt=""></p>
+<p>Here is the code snipped for projecting the vertices and calculating their pixel coordinates:</p>
+<pre><code>// this code works but for production code you would need to be sure that
+// the pixel coordinates are in the range from [0,0] to [width-1,height-1]
+for (uint32_t i = 0; i &lt; numVertices; ++i) {
+	Point3 pt = vertices[i] * worldToCamera * perspMatrix;
+	float pixelCoordX = (pt.x * 0.5 + 0.5) * imageWidth;
+	float pixelCoordY = (0.5 - pt.y * 0.5) * imageHeight; // remap 1 to 0 and -1 to imageHeight
+	std::cerr &lt;&lt; &quot;pixel coordinages: &quot; &lt;&lt; pixelCoordX &lt;&lt; &quot; &quot; &lt;&lt; pixelCoordY &lt;&lt; std::endl;
+}
+</code></pre>
+<h2 id="storing-the-result-into-an-image-file">Storing the Result Into an Image File</h2>
+<p>xx</p>
+<pre><code>unsigned char* buffer = new unsigned char[imageWidth * imageHeight];
+	memset(buffer, 0x0, imageWidth * imageHeight);
+		
+	for (uint32_t i = 0; i &lt; numVertices; ++i) {
+		std::cerr &lt;&lt; &quot;v &quot; &lt;&lt; vertices[i] &lt;&lt; std::endl;
+		Point3 pt = vertices[i] * worldToCamera * perspMatrix;
+		float pixelCoordX = (pt.x * 0.5 + 0.5) * imageWidth;
+		float pixelCoordY = (0.5 - pt.y * 0.5) * imageHeight;
+		std::cerr &lt;&lt; &quot;pix coord &quot; &lt;&lt; pixelCoordX &lt;&lt; &quot; &quot; &lt;&lt; pixelCoordY &lt;&lt; std::endl;
+		buffer[(int)pixelCoordY * imageWidth + (int)pixelCoordX] = 255;
+	}
+
+	std::ofstream ofs(&quot;./result.ppm&quot;, std::ios::binary);
+	ofs &lt;&lt; &quot;P5\n&quot;;
+	ofs &lt;&lt; imageWidth &lt;&lt; &quot; &quot; &lt;&lt; imageHeight &lt;&lt; &quot;\n255\n&quot;;
+	ofs.write((char*)buffer, imageWidth * imageHeight);
+	ofs.close();
+</code></pre>
+<p>xx</p>
+<h2 id="results">Results</h2>
+<p>xx</p>
+<p><img src="file:////images/projecting-3Dpoints-review/maya-angle-of-view.png" alt=""></p>
+<p>xx</p>
+<p><img src="file:////images/projecting-3Dpoints-review/result-proj-matrix.png" alt=""></p>
+<p>xx</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>

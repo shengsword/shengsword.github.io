@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Prerequisites</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h2 id="prerequisites">Prerequisites</h2>
+<p>Most of the techniques we will be studying from that lesson onwards will use what we learned about points, vectors, matrices, cameras, and trigonometry in the lesson on <a href="/lessons/mathematics-physics-for-computer-graphics/geometry/">Geometry</a>. We will reuse a lot of the things we learned in the lesson <a href="/lessons/3d-basic-rendering/3d-viewing-pinhole-camera/">Computing the Pixel of a 3D Point</a> about the different coordinates systems vertices and vectors can be transformed into. You should also be familiar with the concepts studied in the lesson <a href="/lessons/3d-basic-rendering/3d-viewing-pinhole-camera/">3D Viewing: the Pinhole Camera Model</a>. Be sure you have covered these grounds first before you start reading this lesson.</p>
+<h2 id="what-is-this-lesson-about">What Is This Lesson About?</h2>
+<p>In the introductory lesson on <a href="/lessons/3d-basic-rendering/ray-tracing-overview/">Ray-Tracing</a>, we already quickly mentioned how ray-tracing can be used to solve the visibility problem. Let's recall that visible surface determination in the context of 3D rendering is the process used to determine which parts of the scene geometry are visible through the camera. We can use ray tracing to compute visibility (this process was already explained in the previous lesson) by casting a ray through each pixel in the image and looking for the nearest object that this ray intersects (if any). Let's also recall that ray tracing is a technique for computing intersections between rays and surfaces. Using ray-tracing to compute visibility is also called <strong>ray-casting</strong>.</p>
+<blockquote>
+<p>Given a set of obstacles in the Euclidean space, two points in the space are said to be visible to each other if the line segment that joins them does not intersect any obstacles - definition of <a href="http://en.wikipedia.org/wiki/Visibility_(geometry)">visibility</a> on Wikipedia.</p>
+</blockquote>
+<p>Producing an image using ray tracing to solve visibility requires looping over all the pixels in the image, generating a ray for each pixel, casting this ray into the scene, and looking for a possible intersection between this ray and any surface in the scene. These rays are called <strong>primary rays</strong> (or camera or eye rays) because they are the first rays cast into the scene (secondary rays are used to compute things like shadows, reflections, refractions, etc.). To find if the ray intersects a surface, we need to test each object in the scene for a possible intersection against this ray. A ray might intersect more than one surface. The visible surface is the surface with the closest intersection distance. By distance, we mean the distance from the origin of the ray (which in the case of a primary ray, is the position of the camera) and the intersection point.</p>
+<pre><code>for (int j = 0; j &lt; height; ++j) { 
+    for (int i = 0; i &lt; width; ++i) { 
+        // generate primary ray (this is what this lesson is about)
+        ... 
+        float tnear = INFINITY;  //closest intersection, set to INFINITY to start with 
+        for (int k = 0; k &lt; numObjects; ++k) { 
+             float t = INFINITY;  //intersection to the current object if any 
+             if objects[k]-&gt;intersect(pimaryRay, tnear) &amp;&amp; t &lt; tnear) { 
+                 tnear = t; 
+                 framebuffer= objects[k].color; 
+            } 
+        } 
+    } 
+} 
+</code></pre>
+<p>In this lesson, we will formalize the concept of ray and more importantly how primary rays are generated to simulate pinhole cameras. Once we understand how primary rays are generated, the next step will consist of learning a few techniques to compute the intersection between rays and geometry. These are the minimum requirements to produce an image of 3D objects using ray tracing.</p>
+<details>
+Note about ray-tracing and perspective projection: the pinhole camera model is the simplest to simulate in CG. As with rasterization, this is the model we will also be used for ray tracing. Images formed with this model. Remember that the mapping from 3D to 2D described by a pinhole camera is a perspective projection.
+</details>
+<p>In this chapter, we will learn a few useful things about rays. In the next chapter, we will study how primary rays are computed.</p>
+<h2 id="defining-rays">Defining Rays</h2>
+<p><img src="file:////images/ray-tracing-camera/ray.png?" alt="Figure 1: a ray is defined by an origin and a direction."></p>
+<p>As stated in the <a href="/lessons/3d-basic-rendering/ray-tracing-overview/light-transport-ray-tracing-whitted">previous lesson</a>,</p>
+<blockquote>
+<p>Ray-tracing is a technique used to compute the visibility between points. It is simply a technique based on the concept of a ray which can be mathematically (and in a computer program) defined as a point (the origin of the ray in space) and a direction. Then the idea behind ray tracing is to find mathematical solutions to compute the intersection of this ray with various types of geometry: triangles, quadrics (which we study in one of the following lessons), NURBs, etc. This is all there is to ray tracing.</p>
+</blockquote>
+<p>The part we will explain in this lesson (and in this chapter more specifically) is the notion of ray and the way we can define it both in theory and in programming. The only two variables we need to define a ray are a point and a vector. The point (which programmatically we will simply define as a <code>vec3f</code> represents the origin of the ray and the vector, its direction. Keep in mind that direction should generally be normalized.</p>
+<pre><code>// the minimum requirement for defining a ray is a position and a direction
+Vec3f orig;  //ray origin 
+Vec3f dir;  //ray direction (normalized) 
+</code></pre>
+<p>What this point and this direction represent when combined is a half-line. Mathematically, any point on this half-line can be defined as:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>P</mi><mo>=</mo><mi>o</mi><mi>r</mi><mi>i</mi><mi>g</mi><mo>+</mo><mi>t</mi><mo>∗</mo><mi>d</mi><mi>i</mi><mi>r</mi><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">P = orig + t * dir.
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">or</span><span class="mord mathnormal">i</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">i</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord">.</span></span></span></span></span></p>
+<p>Where (t) is the distance from the origin of the point to the point on the half-line. This variable can either be negative or positive. It (t) is negative, the point on the ray is behind the ray origin and if (t) is positive, the point P is in &quot;front&quot; of the ray's origin. Practically, when we use ray tracing, we are generally only interested in finding the intersection of the ray with surfaces located in front of the ray's origin. This means that we will only consider an intersection between a ray and a surface valid if (t) is positive.</p>
+<pre><code>// define ray's origin and direction
+Vec3f orig = ...; 
+Vec3f dir = ...; 
+float t = INFINITY; 
+// does this ray intersect the object? intersect() returns true if an intersection was found
+if (object.intersect(orig, dir, t) &amp;&amp; t &gt; 0) { 
+    // this is a valid intersection, the hit point is in front of the ray's origin
+    ... 
+} 
+</code></pre>
+<p>From a mathematical standpoint, the equation above is called a <a href="http://en.wikipedia.org/wiki/Parametric_equation">parametric equation</a>. The half-line is described by an equation which is a function of the parametric variable (t) (or parameter).</p>
+<p>Ray-geometry intersection routines always return the intersection (if one was found) in terms of the parameter (t). In other words, if an intersection was found then the ray-geometry intersection routine would compute the distance from the ray origin to that intersection and return this information to you. From there you can easily compute the position of the intersection or hit point in 3D space using the ray parametric equation we introduced above.</p>
+<pre><code>// define ray's origin and direction
+Vec3f orig = ...; 
+Vec3f dir = ...; 
+float t = INFINITY;  //intersection distance to the object (if any). Set to a very large number to start with 
+// does this ray intersect the object? intersect() returns true if an intersection was found
+if (object.intersect(orig, dir, t) &amp;&amp; t &gt; 0) { 
+    // this is a valid intersection, the hit point is in front of the ray's origin, compute the hit point using t
+    Vec3f hitPoint = orig + dir * t; 
+} 
+</code></pre>
+<p>This is all there is to rays. From a programming point of view, rays can also be defined as a C++ class:</p>
+<pre><code>class Ray 
+{ 
+public: 
+    Ray(), orig(0), dir(0,0,-1) {} 
+    Ray(const Vec3f &amp;o, const Vec3f &amp;d) : orig(o), dir(d) {} 
+    // etc.
+    ... 
+    Vec3f orig; 
+    Vec3f dir; 
+}; 
+</code></pre>
+<p>Some programmers like to add more member variables to this class, such as a (t_{min}) and a (t_{max}) distance. They define a range of valid values for (t). In other words, if the ray-geometry routine returns a value for (t) that is not contained within the range [(t_{min}), (t_{max})], then there would be no intersection (even if (t) is greater than 0).</p>
+<pre><code>class Ray 
+{ 
+public: 
+    Ray(), orig(0), dir(0,0,-1), tMin(0.1), tMax(1000) {} 
+    Ray(const Vec3f &amp;o, const Vec3f &amp;d) : orig(o), dir(d), tMin(0.1), tMax(1000) {} 
+    // etc.
+    ... 
+    Vec3f orig; 
+    Vec3f dir; 
+    float tMin, tMax; 
+}; 
+ 
+Ray ray; 
+// set ray direction and origin
+ray.orig = ...; 
+ray.dir = ...; 
+float t = INFINITY; 
+if (object.intersect(ray, t) &amp;&amp; t &gt;= ray.tMin &amp;&amp; t &lt;= r.tMax) { 
+     // valid intersection
+     ... 
+} 
+</code></pre>
+<p>You can add as many parameters as you want to the <code>Ray</code> class. You can decide whether to use a Ray class or not. This is entirely left to personal preferences and requirements. There is no rule about the way you represent this data in your program. Some programmers like to add information to the Ray class such as the distance (t) to the closest visible surface (which you set in the ray-geometry routine when an intersection is found), a pointer to the hit object, etc. Some other programmers prefer to separate this information from the ray variables and store them instead in a structure or a class called <code>Intersection</code> for instance. Again, apart from having to at least define the ray origin and ray direction, everything else can be done in just the way you like (and is optional).</p>
+<details>
+One thing that can be useful though in programming is to label the ray somehow based on its type: primary, shadow, reflection, refraction, etc. It can be used to gather statistics (if you want to know how many shadows were cast to render a given scene for example) and can be used in the code to call different functions based on the ray type. This is also a common practice.
+</details>
+<h2 id="what-are-rays-used-for">What Are Rays Used For?</h2>
+<p>Rays can be used pretty much everywhere. They are used to solve the visibility problem, gather information about the colors of objects, compute shadows, etc. The type of rays we will be learning about in this lesson is called <strong>camera rays</strong> or <strong>primary rays</strong>.</p>
+<p><img src="file:////images/ray-tracing-camera/ray1.png?" alt="Figure 2: camera or primary rays are rays which have for origin the origin of the camera and passes through the centers of the pixels. If a primary ray hits geometry in the scene we compute the color of the object at the intersection point and assign this color to the pixel the ray passes through."></p>
+<p>For each pixel in the frame, we will need to construct one camera ray which we will cast into the scene. If rays intersect objects we will compute the color of the objects at these intersection points and assign these colors to the corresponding pixels. This is in short, how a CG image is created with ray tracing. We can make the distinction between primary rays (the first rays cast into the scene which have for origin the origin of the camera) and <strong>secondary rays</strong> (shadow, diffuse, specular, transmission, etc. rays) which we use in shading. Secondary rays are spawned from primary rays at the ray's intersection point. The direction of these secondary rays depends on their type: shadow (we cast a ray in the direction of the light), reflection (we cast a ray in the reflection direction), refraction (we cast a ray in the refraction direction which can be computed using Snell's law), etc.</p>
+<h2 id="whats-next">What's Next?</h2>
+<p>In the next chapter, we will learn how to initialize camera rays for each pixel of the frame, at which point all we need to do to get an image is to implement a simple ray-object intersection routine and store the result in an image file format.</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>

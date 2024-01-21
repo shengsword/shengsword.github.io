@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title></title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <p>In this chapter, we will learn about a fun technique that uses a 2D Perlin noise to displace the vertices of a mesh to create a terrain. As we mentioned in the first lesson on noise, the noise function is a key &quot;procedural texture&quot; primitive from which more complex procedural textures can be created, such as the fractal or the turbulence pattern. We will show an example of a terrain generated using a simple noise function first (image below) and a fractal pattern next.</p>
+<p>This technique will help us understand better the importance of computing the Perlin noise function's derivatives, which is the next chapter's topic.</p>
+<p><img src="file:////images/noise-part-2/perlin-noise-terrain-mesh1.png?" alt=""></p>
+<p>XX TODO. We are missing an image here that shows the mapping between the image and the mesh XX</p>
+<p>The idea behind this technique is straightforward and similar to what we call <strong>displacement mapping</strong>. If you look at the grid from the top, you can see that if you overlay the noise image onto the grid, you get a perfect match: each grid vertex corresponds to a pixel in the noise image. As you know, we can define the coordinates of the pixels in some normalized device coordinates (the pixel coordinates are then in the range from [0,1]). The same can be done with the grid vertices: these are technically called <strong>texture coordinates</strong>. Let's look at the code we shall use to create the grid:</p>
+<pre><code>PolyMesh* createPolyMeshPlane( 
+    uint32_t width = 1, 
+    uint32_t height = 1, 
+    uint32_t subdivisionWidth = 40, 
+    uint32_t subdivisionHeight = 40) 
+{ 
+    PolyMesh *poly = new PolyMesh; 
+    poly-&gt;numVertices = (subdivision with + 1) * (subdivisionHeight + 1); 
+    poly-&gt;vertices = new Vec3f[poly-&gt;numVertices]; 
+    poly-&gt;st = new Vec2f[poly-&gt;numVertices]; 
+    float invSubdivisionWidth = 1.f / subdivisionWidth; 
+    float invSubdivisionHeight = 1.f / subdivisionHeight; 
+    for (uint32_t j = 0; j &lt;= subdivisionHeight; ++j) { 
+        for (uint32_t i = 0; i &lt;= subdivisionWidth; ++i) { 
+            poly-&gt;vertices[j * (subdivisionWidth + 1) + i] = Vec3f(width * (i * invSubdivisionWidth - 0.5), 0, height * (j * invSubdivisionHeight - 0.5)); 
+            poly-&gt;st[j * (subdivisionWidth + 1) + i] = Vec2f(i * invSubdivisionWidth, j * invSubdivisionHeight); 
+        } 
+    } 
+ 
+    poly-&gt;numFaces = subdivisionWidth * subdivisionHeight; 
+    poly-&gt;faceArray = new uint32_t[poly-&gt;numFaces]; 
+    for (uint32_t i = 0; i &lt; poly-&gt;numFaces; ++i) 
+        poly-&gt;faceArray[i] = 4; 
+ 
+    poly-&gt;verticesArray = new uint32_t[4 * poly-&gt;numFaces]; 
+    for (uint32_t j = 0, k = 0; j &lt; subdivisionHeight; ++j) { 
+        for (uint32_t i = 0; i &lt; subdivisionWidth; ++i) { 
+            poly-&gt;verticesArray[k] = j * (subdivisionWidth + 1) + i; 
+            poly-&gt;verticesArray[k + 1] = j * (subdivisionWidth + 1) + i + 1; 
+            poly-&gt;verticesArray[k + 2] = (j + 1) * (subdivisionWidth + 1) + i + 1; 
+            poly-&gt;verticesArray[k + 3] = (j + 1) * (subdivisionWidth + 1) + i; 
+            k += 4; 
+        } 
+    } 
+ 
+    return poly; 
+}
+</code></pre>
+<p>The texture coordinates of the vertex are computed in line 16. This is also a space where the coordinates are in the range from [0,1]. The vertex in the upper left corner of the grid has the texture coordinates [0,0], while the vertex in the lower-right coordinate has the texture coordinate [1,1]. Thus, it becomes easy to use the vertex texture coordinates to look up the noise image.</p>
+<p>!!!
+In this example, we baked the values from the 2D noise function in an image and read the noise values from that image (we showed how to do that in the previous chapter). In practice, we would more likely evaluate the 2D noise function. When an image is used to displace the vertices of an object, we say that this image is a <strong>height map</strong> (or displacement map).
+!!!</p>
+<p>In the case of a height map, we generally use the brightness (the luminance, for example) of the pixels' color to control the displacement amplitude. Typically, the brighter the pixel, the greater the displacement, though, of course, you can map the pixel value to displacement in a completely different way if you wish. It all depends on the effect you intend to create. All you need to remember is that you use an image to somehow control the amount by which the object's vertices are displaced or moved along the normal (the direction perpendicular to the mesh surface. In the case of a plane laying in the xz-plane, the mesh normal is simply (0,1,0) everywhere).</p>
+<pre><code>for (unsigned j = 0; j &lt; imageHeight; ++j) { 
+    for (unsigned i = 0; i &lt; imageWidth; ++i) { 
+        // Perlin noise is in the range [-1:1]
+        float perlinNoise = PerlinNoise::evalAtPoint(Vec3f(i, j, 0) * (1 / 128.f)); 
+        noiseMap[j * imageWidth + i] = (perlinNoise + 1) * 0.5; 
+    } 
+} 
+ 
+// displace
+for (uint32_t i = 0; i &lt; poly-&gt;numVertices; ++i) { 
+    Vec2f st = poly-&gt;st[i]; 
+    uint32_t x = std::min(static_cast&lt;uint32_t&gt;(st.x * imageWidth), imageWidth - 1); 
+    uint32_t y = std::min(static_cast&lt;uint32_t&gt;(st.y * imageHeight), imageHeight - 1); 
+    poly-&gt;vertices[i].y = 2 * noiseMap[y * imageWidth + x] - 1; 
+}
+</code></pre>
+<p>Keep in mind that the values of the Perlin noise are in the range from [-1,1]. But we remapped these values to the range [0,1] when we stored the values in the image buffer (line 5). However, the values are mapped again back in the range from [-1,1] when we displace the vertices later on (line 15) because that way, the mesh will stay centered around the origin along the y-axis. We will push the vertices upward (if the values are greater than 0) or downward (if the values are lower than 0), and if the value is 0, the vertex y-coordinate will stay 0.</p>
+<p>If you render this mesh with the noise image applied on top as a texture, you should get something similar to the first image of this chapter. Note how the white/bright area of the noise image corresponds to bumps in the mesh, while dark regions of the image correspond to dents or valleys (and note how the displacement is proportional to the pixel values).</p>
+<p>As mentioned in the introduction of this chapter, you can use more interesting procedural patterns to displace the mesh vertices, such as a fractal pattern which can be constructed as a weighted sum of noise layers. Check the <a href="/lessons/procedural-generation-virtual-worlds/procedural-patterns-noise-part-1/simple-pattern-examples">previous lesson on noise</a> to learn how to generate a fractal pattern using the noise function as a building block. Here is the code to generate the fractal image that was used to displace the mesh:</p>
+<pre><code>uint32_t numLayers = 5; 
+float maxVal = 0; 
+for (uint32_t j = 0; j &lt; imageHeight; ++j) { 
+    for (uint32_t i = 0; i &lt; imageWidth; ++i) { 
+        float fractal = 0; 
+        float amplitude = 1; 
+        Vec3f pt = Vec3f(i, j, 0) * (1 / 128.f); 
+        for (uint32_t k = 0; k &lt; numLayers; ++k) { 
+            fractal += (1 + PerlinNoise::evalAtPoint(pt)) * 0.5 * amplitude; 
+            pt *= 2; 
+            amplitude *= 0.5; 
+        } 
+        if (fractal &gt; maxVal) maxVal = fractal; 
+        noiseMap[j * imageWidth + i] = fractal; 
+    } 
+} 
+ 
+for (uint32_t i = 0; i &lt; imageWidth * imageHeight; ++i) 
+    noiseMap[i] /= maxVal;
+</code></pre>
+<p>A fractal image generally contains higher frequency details than a single layer of noise. Thus, to see these details in the displacement, you will likely have to increase the density of the mesh itself. Here is a render of the mesh displaced with a fractal image.</p>
+<p><img src="file:////images/noise-part-2/perlin-noise-terrain-mesh2.png?" alt=""></p>
+<p>As suggested in the previous lesson, this technique can generate realistic terrains (hopefully, the image above is convincing enough). We can also use the noise function to create and animate water surfaces. In this example, the procedural pattern we used (a fractal) is pretty simple. You can play with the parameters a bit to modify the look of the terrain, but to increase the realism of the terrain, we would need to add effects such as erosion. But we will leave that topic for another lesson.</p>
+<p>As a final note, we haven't computed the normal of the mesh after displacement. How do we do that? This is the topic of our next chapter. We will learn how to compute a &quot;true&quot; normal at the vertex position after displacement using the noise function derivatives.</p>
+
+            
+            
+        </body>
+        </html>

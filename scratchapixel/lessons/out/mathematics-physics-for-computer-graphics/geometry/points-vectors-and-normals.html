@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>A Word of Warning</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <blockquote>
+<p>Geometry is a branch of mathematics concerned with questions of shape, size, the relative position of figures, and the properties of space.</p>
+</blockquote>
+<h2 id="a-word-of-warning">A Word of Warning</h2>
+<p>This lesson will be long and tedious for most readers. If you are new to computer graphics, take the time to read it carefully. Understanding this part of the CG pipeline is crucial and will save you much time later.</p>
+<h2 id="introduction-to-geometry">Introduction to Geometry</h2>
+<p>Points, vectors, matrices, and normals are to computer graphics what the alphabet is to literature; hence most CG books start with a chapter on linear algebra and geometry. However, for many looking to learn graphics programming, presenting a lot of maths before learning about making images can be pretty upsetting. So if you don't think CG programming is for you because you do not feel comfortable with maths or don't understand what a matrix is, don't give up now.</p>
+<p>We began the &quot;Foundation of 3D Rendering&quot; section with a couple of lessons that do not require any prior knowledge of linear algebra for a reason. While this is a relatively unconventional way of teaching CG programming techniques, it's more exciting for you to get started with something practical and fun: an introductory ray tracer that requires very little knowledge of maths and some programming knowledge. Writing a renderer is a much more exciting and rewarding way of learning maths, as you can see incrementally how certain things are used to produce a concrete result (i.e., your final image). That being said, points, vectors, and matrices are instrumental in making CG images; we will use them extensively in every lesson.</p>
+<p>In this lesson, you will learn what these constructs are, how they work, and the various techniques that can be used to manipulate them. This lesson will also explain the different conventions in linear algebra that CG researchers have used over the years when solving their problems and writing their code. You need to be aware of these conventions as they are often not mentioned in books (and poorly documented on the web). However, these conventions are essential; before reading or using another developer's code or techniques, you must check their conventions.</p>
+<p>One quick note before we begin. If you are a mathematical purist, you might find it strange to see things explained here that are not technically related to linear algebra. We want to keep the scope of this lesson broad and include simple mathematical techniques commonly used in CG, which may only loosely relate to vectors and matrices. For instance, mathematically speaking, a point has nothing to do with linear algebra (a branch of mathematics only concerned with vectors). We chose to cover points because they are ubiquitous in CG (and the same mathematical techniques from linear algebra can be used to manipulate them). If you still need to understand the distinction between points and vectors, do not worry. We will cover that extensively in this chapter.</p>
+<h2 id="what-is-linear-algebra-introduction-to-vectors">What is Linear Algebra? Introduction to Vectors</h2>
+<p>So what exactly is linear algebra, and what will we study in this lesson? As we mentioned in the previous section, linear algebra is a branch of mathematics that has to do with the study of <strong>vectors</strong>. Now you might ask, &quot;What is a vector, and how is it useful in the CG world?&quot; We won't get into much detail, but a vector can be represented as an array of <strong>numbers</strong>. This array of numbers, which can assume any desired length, is also sometimes called a <strong>tuple</strong> in mathematics. If we want to be specific about the size of the vector, we may choose to say <strong>n-tuple</strong> where <strong>n</strong> represents the number of elements in the vector. Below is an example of the mathematical notation for a vector with 6 elements:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>V</mi><mo>=</mo><mo stretchy="false">(</mo><mi>a</mi><mo separator="true">,</mo><mi>b</mi><mo separator="true">,</mo><mi>c</mi><mo separator="true">,</mo><mi>d</mi><mo separator="true">,</mo><mi>e</mi><mo separator="true">,</mo><mi>f</mi><mo stretchy="false">)</mo><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">V = (a, b, c, d, e, f).
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">b</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">c</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">d</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">e</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mclose">)</span><span class="mord">.</span></span></span></span></span></p>
+<p>Where a, b, c, d, e, f are real numbers (1, 3, 4.56, -11, -13.08, 0, etc.).</p>
+<p>The idea behind grouping these numbers is that collectively they represent another value or concept that is meaningful in the context of the problem. For example, in computer graphics, vectors can represent either a position or direction in space. We will also be able to transform (or modify) these vectors through a very powerful and compact series of operations. The process of transforming the content of a vector is achieved through what is called a <strong>linear transformation</strong>. We will spend much more time discussing transformations in a later section; for now, it is only necessary to recognize that they are instrumental.</p>
+<h2 id="points-and-vectors">Points and Vectors</h2>
+<p>The terms <strong>point</strong> and <strong>vector</strong> are used in several scientific fields. In this lesson, we will explain their meaning in the context of computer graphics.</p>
+<p>A <strong>point</strong> is a <strong>position</strong> in a three-dimensional space. A <strong>vector</strong>, on the other hand, usually means a <strong>direction</strong> (and some corresponding magnitude or size) in three-dimensional space. Vectors can be thought of as arrows pointing in various directions. Three-dimensional <strong>points</strong> and <strong>vectors</strong> are similar in that they are both represented by the tuple notation mentioned above.</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>V</mi><mo>=</mo><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo separator="true">,</mo><mi>x</mi><mo stretchy="false">)</mo><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">V = (x, y, x).
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">x</span><span class="mclose">)</span><span class="mord">.</span></span></span></span></span></p>
+<p>Again, where (x, y, z) are real numbers.</p>
+<p><img src="file:////images/geometry/pointvec.png?" alt="Figure 1: a point describes a position in space. A vector can be seen as a direction."></p>
+<p>Remember, when talking to a mathematician or a physicist, their understanding of a vector or point could be far more general; they are not necessarily restricted to the use we make of them in CG. For them, a vector could be arbitrary or even infinite (meaning it can contain as many numbers as desired).</p>
+<p>We will finish this chapter by briefly mentioning <strong>homogeneous points</strong>. Sometimes it is necessary to add a fourth element for mathematical convenience. An example of a point with homogeneous coordinates is given below:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>P</mi><mi>H</mi></msub><mo>=</mo><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo separator="true">,</mo><mi>z</mi><mo separator="true">,</mo><mi>w</mi><mo stretchy="false">)</mo><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">P_H=(x, y, z, w).
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.08125em;">H</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="mclose">)</span><span class="mord">.</span></span></span></span></span></p>
+<p>Homogeneous points are used when it comes to multiplying points with matrices. Don't worry too much about them at this point in the lesson. We mention them now as they sometimes appear in the literature and can confuse readers. They will be explained in detail later in this lesson.</p>
+<h2 id="a-quick-introduction-to-transformations">A Quick Introduction to Transformations</h2>
+<p>You might still wonder how a linear transformation affects points and vectors. It's pretty simple. One of the most common operations we perform on points in CG consists of simply moving them around in space. This transformation is called <strong>translation</strong> and plays a vital role in rendering.</p>
+<p>The translation operator is a linear transformation of the original point (which can be viewed as an input position point). Translation has no meaning when applied to a vector (which, remember, is a direction). This is because where the vector begins (that is, where it is centered) is unimportant; regardless of position, all &quot;arrows&quot; of the same length, pointing in the same direction, are equivalent. Instead, we very commonly use another linear transformation on vectors: rotation. Many more common operators can be used, but let's consider translation for points and rotations for vectors.</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.16em" columnalign="left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mi>P</mi><mo>→</mo><mi>T</mi><mi>r</mi><mi>a</mi><mi>n</mi><mi>s</mi><mi>l</mi><mi>a</mi><mi>t</mi><mi>e</mi><mo>→</mo><msub><mi>P</mi><mi>T</mi></msub></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mi>V</mi><mo>→</mo><mi>R</mi><mi>o</mi><mi>t</mi><mi>a</mi><mi>t</mi><mi>e</mi><mo>→</mo><msub><mi>V</mi><mi>T</mi></msub></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{array}{l}
+P \rightarrow Translate \rightarrow P_T\\  
+V \rightarrow Rotate \rightarrow V_T
+\end{array}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:2.4em;vertical-align:-0.95em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">an</span><span class="mord mathnormal">s</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">a</span><span class="mord mathnormal">t</span><span class="mord mathnormal">e</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mord mathnormal">o</span><span class="mord mathnormal">t</span><span class="mord mathnormal">a</span><span class="mord mathnormal">t</span><span class="mord mathnormal">e</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.2222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.95em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></p>
+<p>The subscripted letter (\small T) stands for &quot;transformed&quot;.</p>
+<p>As you may have noticed, we have yet to discuss what a vector's length, or magnitude, means. Indeed, the length of the arrow has great importance in CG. When the length of a vector is precisely 1, we say that the vector is <strong>normalized</strong> (you will hear and read this term all the time). Normalizing a vector involves altering the vector such that its length becomes 1, but its direction remains unchanged. Most of the time, we will want our vectors to be normalized. However, in some cases, not normalizing them can be preferred as the length of the vector will be meaningful.</p>
+<p>For instance, imagine that you trace a line from point (A) to point (B). The line created is a vector that indicates where point (B) is located relative to point (A). It gives the direction of (B) as if you were standing at point (A). In this case, the vector's length indicates the distance from (A) to (B). This distance is sometimes required in specific algorithms.</p>
+<p>Normalization of vectors is often a source of bugs in applications. Therefore, every time you declare a vector (or even use one), we recommend you consciously ask yourself if this vector is/isn't or should/shouldn't be normalized.</p>
+<h2 id="normals">Normals</h2>
+<p><img src="file:////images/geometry/normal.png?" alt="Figure 2: a normal is perpendicular to the plane tangent a P."></p>
+<p>A normal is a technical term used in Computer Graphics (and Geometry) to describe the orientation of a surface of a geometric object at a point on that surface. Technically, the <strong>surface normal</strong> to a surface at point (P), can be seen as the vector perpendicular to a plane tangent to the surface at (P). Normals play an essential role in shading, where they are used to compute the brightness of objects (see further lessons on Lights and Shading).</p>
+<p>Normals can be thought of as vectors with one caveat: they do not transform the same way as vectors. This is one of the main reasons we take the time to differentiate them. You will find more information on this topic in the chapter <a href="/lessons/mathematics-physics-for-computer-graphics/geometry/transforming-normals">Transforming Normals</a>. For now, it is only essential to understand what they are.</p>
+<h2 id="from-theory-to-c">From Theory to C++</h2>
+<p>In our C++ code, we won't distinguish between points, vectors, and normals; we represent all three with a Vec3 class (a template class so that we can create float, int, or double versions as needed). Some developers prefer to differentiate them. This limits the possibility of making mistakes. From experience, we found it more efficient (less code to write in the first place) to deal with one unique class (as the OpenEXR library does). However, we will still have to call a few specific functions carefully depending on whether or not the <code>Vec3</code> we are dealing with represents a point, a vector, or a normal. As you may remember, this is particularly critical when we use transformations. The full source code is provided in the download section of this lesson.</p>
+<pre><code>template&lt;typename T&gt; 
+class Vec3 
+{ 
+public: 
+    // 3 most basic ways of initializing a vector
+    Vec3() : x(T(0)), y(T(0)), z(T(0)) {} 
+    Vec3(const T &amp;xx) : x(xx), y(xx), z(xx) {} 
+    Vec3(T xx, T yy, T zz) : x(xx), y(yy), z(zz) {} 
+    T x, y, z; 
+}; 
+ 
+typedef Vec3&lt;float&gt; Vec3f; 
+ 
+Vec3&lt;float&gt; a; 
+Vec3f b;
+</code></pre>
+<h2 id="summary">Summary</h2>
+<p>From this first chapter, you should remember that mathematically a vector can be of any dimension. However, in CG, we use a more specific definition: a <strong>vector</strong> is a direction in 3D space (and therefore represented by three numbers). Additionally, we talk of <strong>points</strong> as representations of positions (also in 3D space and represented by three numbers). <strong>Homogeneous points</strong> are represented with four numbers but are a particular case we will study later.</p>
+<p>Points and vectors can be transformed using <strong>linear transformations</strong>.</p>
+<details>
+You will see the term linear transformation being used often. For example, if lines are preserved while being transformed, then we speak of a linear transformation (multiplication by a matrix is a linear transformation).
+</details>
+<p>Typical examples of such transformations are <strong>translation</strong> for points and <strong>rotation</strong> for vectors. The length of a vector can be set to 1, in which case we say that it is <strong>normalized</strong>. The length of a vector (before it is normalized) represents the distance between two points and is sometimes needed in specific algorithms. For this reason, developers must be careful when and why they potentially choose to normalize a vector.</p>
+<h2 id="whats-next">What's Next?</h2>
+<p>One important thing we still need to explain is what the three numbers defining points and vectors represent. These numbers represent the coordinates of a point (in 2D or 3D space) with respect to a reference (also sometimes called the origin). This reference, which we technically call a <strong>coordinate system</strong>, is the topic of our next chapter.</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>

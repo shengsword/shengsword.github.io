@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Forward Tracing</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <p>The phenomenon described by Ibn al-Haytham explains why we see objects. Two interesting remarks can be made based on his observations: firstly, without light, we cannot see anything, and secondly, without objects in our environment, we cannot see light. If we were to travel in intergalactic space, that is what would typically happen. If there is no matter around us, we cannot see anything but darkness even though photons are potentially moving through that space (of course; if there were photons, they would have to come from somewhere. And if you looked at them directly, if they entered your eyes, you would see the image of the object from which they were reflected or emitted).</p>
+<h2 id="forward-tracing">Forward Tracing</h2>
+<p><img src="file:////images/introduction-to-ray-tracing/lighttoeyebounce.png" alt="Figure 1: countless photons emitted by the light source hit the green sphere, but only one will reach the eye's surface."></p>
+<p>If we are trying to simulate the light-object interaction process in a computer-generated image, then there is another physical phenomenon that we need to be aware of. Compared to the total number of rays reflected by an object, only a select few of them will ever reach the surface of our eye. Here is an example. Imagine we have created a light source that emits only one single photon at a time. Now let's examine what happens to that photon. It is emitted from the light source and travels in a straight line path until it hits the surface of our object. Ignoring photon absorption, we can assume the photon is reflected in a random direction. If the photons hit the surface of our eye, we &quot;see&quot; the point where the photon was reflected from (figure 1).</p>
+<details>
+_Above, you claim that "each point on an illuminated area or object radiates (reflects) light rays in every direction." Doesn't this contradict ''random''?_
+<p>Explaining why light is reflected in every possible direction is off-topic for this particular lesson (one can refer to the lesson on light-matter interaction for a complete explanation). However, to answer your question briefly: yes and no. Of course, in nature, a real photon is reflected by a real surface in a particular direction (and therefore not a random one) defined by the geometry's topology and the photon's incoming direction at the point of intersection. The surface of a diffuse object appears smooth if we look at it with our eyes. Although if we look at it with a microscope, we realize that the microstructure could be more complex and smoother. The image on the left is a photograph of paper with different magnification scales. Photons are so small that the micro-features and shapes reflect them on the object's surface. Suppose a beam of light hits the surface of this diffuse object. In that case, photons within the beam's volume will hit very different parts of the microstructure and, therefore, will be reflected in lots of different directions. So many that we say, &quot;every possible direction.&quot; Suppose we want to simulate this interaction between the photons and the microstructure. In that case, we shoot rays in random directions, which, statistically speaking, is about the same as if they were reflected in every possible direction.</p>
+<p>Sometimes the material's structure at the macro level is organized in patterns that can cause the surface of an object to reflect light in particular directions. This is described as an anisotropic reflection and will be explained in detail in the lesson on light-materials interaction. The material's macrostructure can also cause unusual visual effects such as iridescence, which we can observe in butterflies' wings.</p>
+<p><img src="file:////images/introduction-to-ray-tracing/paperstruct.png" alt=""></p>
+</details>
+<p>We can now look at the situation in terms of computer graphics. First, we replace our eyes with an image plane composed of pixels. In this case, the photons emitted will hit one of the many pixels on the image plane, increasing the brightness at that point to a value greater than zero. This process is repeated multiple times until all the pixels are adjusted, creating a computer-generated image. This technique is called <strong>forward ray tracing</strong> because we follow the photon's path from the light source to the observer.</p>
+<p>However, do you see a potential problem with this approach?</p>
+<p>The problem is the following: in our example, we assumed that the reflected photon always intersected the eye's surface. In reality, rays are reflected in every possible direction, each of which has a very, very small probability of hitting the eye. We would have to cast zillions of photons from the light source to find only one photon that would strike the eye. This is how it works in nature, as countless photons travel in all directions at the speed of light. In the computer world, simulating the interaction of many photons with objects in a scene is not a practical solution for the reasons we will now explain.</p>
+<p>So you may think: &quot;Do we need to shoot photons in random directions? Since we know the eye's position, why not just send the photon in that direction and see which pixel in the image it passes through, if any?&quot; That is one possible optimization. However, we can only use this method for certain types of material. In a later lesson on light-matter interaction, we will explain that directionality is not essential for diffuse surfaces. This is because a photon that hits a diffuse surface can be reflected in any direction within the hemisphere centered around the normal at the point of contact. However, suppose the surface is a mirror and does not have diffuse characteristics. In that case, the ray can only be reflected in an exact direction, the mirrored direction (something which we will learn how to compute later on). For this type of surface, we can not decide to artificially change the direction of the photon if it's supposed to follow the mirrored direction, which means that this solution could be more satisfactory.</p>
+<details>
+_Is the eye only a point receptor, or does it have a surface area? Even if the receiving surface is very small, it still has an area and therefore is larger than a point. If the receiving area is larger than a point, the surface will surely receive more than just 1 out of the zillions of rays._
+<p>The reader is correct. An eye is not a point receptor but a surface receptor-like the film or CCD in your camera. Because this lesson is just an introduction to the ray-tracing algorithm, this topic needs to be explained in detail. Both cameras and the human eye have a lens that focuses reflected light rays onto a surface behind it. If the lens had a very small radius (which is not technically the case), the light reflected off an object could only come from one direction. That is how pinhole cameras work. We will talk about them in the lesson on cameras.</p>
+</details>
+<p>Even if we decide to use this method, with a scene made up of diffuse objects only, we would still need help. We can visualize shooting photons from a light into a scene as if we were spraying light rays (or small particles of paint) onto an object's surface. If the spray is not dense enough, some areas will not be illuminated uniformly.</p>
+<p>Imagine trying to paint a teapot by making dots with a white marker pen onto a black sheet of paper (consider every dot a photon). As shown in the image below, only a few photons intersect with the teapot object, leaving many uncovered areas. As we add dots, the density of photons increases until the teapot is &quot;almost&quot; entirely covered with photons making the object more easily recognizable.</p>
+<p><img src="file:////images/introduction-to-ray-tracing/teapotracing.gif" alt=""></p>
+<p>But shooting 1000 photons, or even X times more will never guarantee that our object's surface will be covered with photons. That's a significant drawback of this technique. In other words, we would have to let the program run until we decide that it had sprayed enough photons onto the object's surface to get an accurate representation of it. This implies that we must watch the image as it's being rendered to decide when to stop the application. In a production environment, this isn't possible. As we will see, the most expensive task in a ray tracer is finding ray-geometry intersections. Creating many photons from the light source is not an issue, but finding all their meetings within the scene would be prohibitively expensive.</p>
+<p>Conclusion: <strong>Forward ray tracing</strong> (or <strong>light tracing</strong> because we shoot rays from the light) makes it technically possible to simulate how light travels in nature on a computer. However, as discussed, this method could be more efficient and practical. In a seminal paper entitled &quot;An Improved Illumination Model for Shaded Display&quot;, published in 1980, Turner Whitted (one of the earliest researchers in computer graphics) wrote:</p>
+<blockquote>
+<p>In an evident approach to ray tracing, light rays emanating from a source are traced through their paths until they strike the viewer. Since only a few will reach the viewer, this approach could be better. In a second approach suggested by Appel, rays are traced in the opposite direction, from the viewer to the objects in the scene.</p>
+</blockquote>
+<p>We will now look at this other mode Whitted talks about.</p>
+<h2 id="backward-tracing">Backward Tracing</h2>
+<p><img src="file:////images/introduction-to-ray-tracing/tracefromeyetolight.gif" alt="Figure 2: backward ray-tracing. We trace a ray from the eye to a point on the sphere, then a ray from that point to the light source."></p>
+<p>Instead of tracing rays from the light source to the receptor (such as our eye), we trace rays backward from the receptor to the objects. Because this direction is the reverse of what happens in nature, it is called <strong>backward ray-tracing</strong> or <strong>eye tracing</strong> because we shoot rays from the eye position (figure 2). This method provides a convenient solution to the flaw of forward ray tracing. Since our simulations cannot be as fast and perfect as nature, we must compromise and trace a ray from the eye into the scene. If the ray hits an object, we determine how much light it receives by throwing another ray (called a light or shadow ray) from the hit point to the scene's light. Occasionally this &quot;light ray&quot; is obstructed by another object from the scene, meaning that our original hit point is in a shadow; it doesn't receive any illumination from the light. For this reason, we don't name these rays light rays but <strong>shadow rays</strong> instead. In the CG literature, the first ray we shoot from the eye (or the camera) into the scene is called a <strong>primary ray</strong>, <strong>visibility ray</strong>, or <strong>camera ray</strong>.</p>
+<details>
+In this lesson, we have used forward tracing to describe the situation where rays are cast from the light as opposed to backward tracing, where rays are shot from the camera. However, some authors use these terms the other way around. Forward tracing means shooting rays from the camera because it is the most common path-tracing technique used in CG. To avoid confusion, you can also use the terms light and eye tracing, which are more explicit. These terms are more often used in the context of bi-directional path tracing (see the Light Transport section).
+</details>
+<h2 id="conclusion">Conclusion</h2>
+<p>In computer graphics, the concept of shooting rays either from the light or from the eye is called <strong>path tracing</strong>. The term ray-tracing can also be used, but the idea of path tracing suggests that this method of making computer-generated images relies on following the path from the light to the camera (or vice versa). By doing so in a physically realistic way, we can easily simulate optical effects such as caustics or the reflection of light by another surface in the scene (indirect illumination). These topics will be discussed in other lessons.</p>
+
+            
+            
+        </body>
+        </html>

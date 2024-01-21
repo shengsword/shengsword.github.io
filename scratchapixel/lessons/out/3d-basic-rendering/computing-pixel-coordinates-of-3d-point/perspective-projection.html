@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>How Do I Find the 2D Pixel Coordinates of a 3D Point&quest;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h2 id="how-do-i-find-the-2d-pixel-coordinates-of-a-3d-point">How Do I Find the 2D Pixel Coordinates of a 3D Point?</h2>
+<p>&quot;<strong>How do I find the 2D pixel coordinates of a 3D point?</strong>&quot; is one of the most common questions in 3D rendering on the Web. It is an essential question because it is the fundamental method to create an image of a 3D scene. In this lesson, we will use the term <strong>rasterization</strong> to describe the process of finding 2D pixel coordinates of 3D points. In its broader sense, Rasterization refers to converting 3D shapes into a raster image. A raster image, as explained in the <a href="/lessons/3d-basic-rendering/rendering-3d-scene-overview/">previous lesson</a>, is the technical term given to a digital image; it designates a two-dimensional array (or rectangular grid if you prefer) of pixels.</p>
+<p>Don't be mistaken: different rendering techniques exist for producing images of 3D scenes. Rasterization is only one of them. Ray tracing is another. Note that all these techniques rely on the same concept to make that image: the idea of <strong>perspective projection</strong>. Therefore, for a given camera and a given 3D scene, all rendering techniques produce the same visual result; they use a different approach to produce that result.</p>
+<p>Also, computing the 2D pixel coordinates of 3D points is only one of the two steps in creating a photo-realistic image. The other step is the process of shading, in which the color of these points will be computed to simulate the appearance of objects. You need more than just converting 3D points to pixel coordinates to produce a &quot;complete&quot; image.</p>
+<p><img src="file:////images/perspective-matrix/xtree.png?" alt=""></p>
+<p>To understand rasterization, you first need to be familiar with a series of essential techniques that we will also introduce in this chapter, such as:</p>
+<ul>
+<li>The concept of local vs. global coordinate system.</li>
+<li>Learning how to interpret 4x4 matrices as coordinate systems.</li>
+<li>Converting points from one coordinate system to another.</li>
+</ul>
+<p>Read this lesson carefully, as it will provide you with the fundamental tools that almost all rendering techniques are built upon.</p>
+<p>We will use matrices in this lesson, so read the Geometry lesson if you are uncomfortable with coordinate systems and matrices.</p>
+<p>We will apply the techniques studied in this lesson to render a <strong>wireframe</strong> image of a 3D object (adjacent image). The files of this program can be found in the source code chapter of the lesson, as usual.</p>
+<h2 id="a-quick-refresher-on-the-perspective-projection-process">A Quick Refresher on the Perspective Projection Process</h2>
+<p><img src="file:////images/rendering-3d-scene-overview/perspective4.png?" alt="Figure 1: to create an image of a cube, we need to extend lines from the corners of the object towards the eye and find the intersection of these lines with a flat surface (the canvas) perpendicular to the line of sight."></p>
+<p>We talked about the perspective projection process in quite a few lessons already. For instance, check out the chapter <a href="/lessons/3d-basic-rendering/rendering-3d-scene-overview/visibility-problem">The Visibility Problem</a> in the lesson &quot;Rendering an Image of a 3D Scene: an Overview&quot;. However, let's quickly recall what perspective projection is. In short, this technique can be used to create a 2D image of a 3D scene by projecting points (or vertices) that make up the objects of that scene onto the surface of a canvas.</p>
+<p>We use this technique because it is similar to how the human eye works. Since we are used to seeing the world through our eyes, it's pretty natural to think that images created with this technique will also look natural and &quot;real&quot; to us. You can think of the human eye as just a &quot;point&quot; in space (Figure 2) (of course, the eye is not exactly a point; it is an optical system converging rays onto a small surface - the retina). What we see of the world results from light rays (reflected by objects) traveling to the eye and entering the eye. So again, one way of making an image of a 3D scene in computer graphics (CG) is to do the same thing: project vertices onto the surface of the canvas (or screen) as if the rays were sliding along straight lines that connect the vertices to the eye.</p>
+<p>It is essential to understand that perspective projection is just an arbitrary way of representing 3D geometry onto a two-dimensional surface. This method is most commonly used because it simulates one of the essential properties of human vision called <strong>foreshortening</strong>: objects far away from us appear smaller than objects close by. Nonetheless, as mentioned in the Wikipedia article on <a href="https://en.wikipedia.org/wiki/Perspective_(graphical)">perspective</a>, it is essential to understand that the perspective projection is only an <strong>approximate representation</strong> of what the eye sees, represented on a flat surface (such as paper). The important word here is &quot;approximate&quot;.</p>
+<p><img src="file:////images/perspective-matrix/raystoeye.png?" alt="Figure 2: among all light rays reflected by an object, some of these rays enter the eye, and the image we have of this object, is the result of these rays."></p>
+<p><img src="file:////images/rendering-3d-scene-overview/projection3.png?" alt="Figure 3: we can think of the projection process as moving a point down along the line that connects the point to the eye. We can stop moving the point along that line when the point lies on the plane of the canvas. We don't explicitly &quot;slide&quot; the point along this line, but this is how the projection process can be interpreted."></p>
+<p>In the lesson mentioned above, we also explained how the world coordinates of a point located in front of the camera (and enclosed within the viewing frustum of the camera, thus visible to the camera) could be computed using a simple geometric construction based on one of the properties of similar triangles (Figure 3). We will review this technique one more time in this lesson. The equations to compute the coordinates of projected points can be conveniently expressed as a 4x4 matrix. The computation is simple but a series of operations on the original point's coordinates: this is what you will learn in this lesson. However, by expressing the computation as a matrix, you can reduce these operations to a single point-matrix multiplication. This approach's main advantage is representing this critical operation in such a compact and easy-to-use form. It turns out that the perspective projection process, and its associated equations, can be expressed in the form of a 4x4 matrix, as we will demonstrate in the lesson devoted to the <a href="/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/">the perspective and orthographic projection matrices</a>. This is what we call the <strong>perspective projection matrix</strong>. Multiplying any point whose coordinates are expressed with respect to the <strong>camera coordinate system</strong> (see below) with this perspective projection matrix will give you the position (or coordinates) of that point on the canvas.</p>
+<details>
+In CG, transformations are almost always linear. But it is essential to know that the perspective projection, which belongs to the more generic family of **projective transformation**, is a non-linear transformation. If you're looking for a visual explanation of which transformations are linear and which transformations are not, this [Youtube video](https://www.youtube.com/watch?v=kYB8IZa5AuE) does a good job.
+</details>
+<p>Again, in this lesson, we will learn about computing the 2D pixel coordinates of a 3D point without using the perspective projection matrix. To do so, we will need to learn how to &quot;project&quot; a 3D point onto a 2D drawable surface (which we will call in this lesson a canvas) using some simple geometry rules. Once we understand the mathematics of this process (and all the other steps involved in computing these 2D coordinates), we will then be ready to study the construction and use of the perspective projection matrix: a matrix used to simplify the projection step (and the projection step only). This will be the topic of the next lesson.</p>
+<h2 id="some-history">Some History</h2>
+<p><img src="file:////images/perspective-matrix/duerer.png?" alt=""></p>
+<p>The mathematics behind perspective projection started to be understood and mastered by artists towards the end of the fourteenth century and the beginning of the fifteenth century. Artists significantly contributed to educating others about the mathematical basis of perspective drawing through books they wrote and illustrated themselves. A notable example is &quot;The Painter's Manual&quot; published by Albrecht Dürer in 1538 (the illustration above comes from this book). Two concepts broadly characterize perspective drawing:</p>
+<ul>
+<li>Objects appear smaller as their distances to the viewer increase.</li>
+<li><strong>Foreshortening</strong>: the impression, or optical illusion, that an object or a distance is smaller than it is due to being angled towards the viewer.</li>
+</ul>
+<p>Another rule in foreshortening states that vertical lines are parallel, while nonvertical lines converge to a perspective point, appearing shorter than they are. These effects give a sense of depth, which helps evaluate the distance of objects from the viewer. Today, the same mathematical principles are used in computer graphics to create a perspective view of a 3D scene.</p>
+
+            
+            
+        </body>
+        </html>

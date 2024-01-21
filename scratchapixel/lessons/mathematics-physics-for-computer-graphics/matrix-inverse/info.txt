@@ -1,0 +1,2 @@
+@Matrix Inverse: Gauss-Jordan Method
+matrix-inverse.md:Matrix Inverse
